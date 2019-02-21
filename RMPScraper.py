@@ -2,7 +2,9 @@ from bs4 import BeautifulSoup
 import urllib.request
 
 def ProfessorSearch(prof_name):
-    site = "http://www.ratemyprofessors.com/search.jsp?queryoption=HEADER&queryBy=teacherName&schoolName=&schoolID=&query=" + prof_name
+    prof_name = prof_name.replace("_", "+")
+    print(prof_name)
+    site = "http://www.ratemyprofessors.com/search.jsp?query=" + prof_name
     document = urllib.request.urlopen(site).read()
     soup = BeautifulSoup(document, "html.parser")
     results = soup.findAll(name="li", attrs={"listing PROFESSOR"})
@@ -36,4 +38,4 @@ def getRMPReviews(link):
             pass
     return result
 
-getRMPReviews("http://www.ratemyprofessors.com/ShowRatings.jsp?tid=735533")
+#getRMPReviews("http://www.ratemyprofessors.com/ShowRatings.jsp?tid=735533")

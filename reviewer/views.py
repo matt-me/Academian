@@ -4,6 +4,7 @@ from django.http import Http404
 from django.http import HttpResponse
 from django.template import loader
 from .models import Professor
+from RMPScraper import getRMPReviews, ProfessorSearch
 
 def index(request):
     last_updated_list = sorted(Professor.objects.all(), key=lambda professor: professor.hitCounter)
@@ -18,3 +19,10 @@ def professor(request, id):
     except Professor.DoesNotExist:
         raise Http404("Professor does not exist. Will scrape for it soon.")
     return render(request, 'reviewer/professor.html', {'professor': professor})
+
+def results(request, name):
+    try:
+        professors = ProfessorSearch(name)
+    except:
+        pass
+    return render(request, 'reviewer/results.html', {'professors': professors})
