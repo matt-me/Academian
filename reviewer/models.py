@@ -27,7 +27,6 @@ class Professor(models.Model):
     def __str__(self):
         return self.name
 
-
 class redditSnapshot(models.Model):
     url = models.URLField()
     Reviews = models.ManyToManyField(Review)
