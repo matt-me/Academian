@@ -46,9 +46,9 @@
         <li><a href="/reviewer/professor/{{ professor.id }}/">{{ professor.name }}</a></li>
     {% endfor %}
     </ul>
-    <form class="form-inline my-2 my-lg-0">
-            <input class="form-control mr-sm-2" type="search" placeholder="Search for professors" aria-label="Search">
-            <button type="submit" class="btn">Submit</button>
+    <form class="form-inline my-2 my-lg-0" action="/reviewer/search/{% " method="GET">
+            <input class="form-control mr-sm-2" type="search" placeholder="Enter professor name" aria-label="Search">
+            <button type="submit" class="btn" value="Submit">Search</button>
           </form>
 {% else %}
     <p>No professor information is available.</p>

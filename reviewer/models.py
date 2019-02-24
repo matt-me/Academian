@@ -20,7 +20,7 @@ class RateMyProfSnapshot(models.Model):
 class Professor(models.Model):
     name = models.CharField(max_length=50)
     courses = models.ManyToManyField(Course)
-    school = models.CharField(max_length=50)
+    school = models.CharField(max_length=100)
     ratingPages = models.ManyToManyField(RateMyProfSnapshot)
     lastUpdated = models.DateTimeField()
     hitCounter = models.IntegerField()

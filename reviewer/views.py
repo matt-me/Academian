@@ -17,6 +17,7 @@ def professor(request, id):
     try:
         professor = Professor.objects.get(id=id)
         professor.hitCounter = professor.hitCounter + 1
+        professor.lastUpdated = timezone.now()
         professor.save()
     except Professor.DoesNotExist:
         raise Http404("Professor does not exist.")
@@ -30,11 +31,13 @@ def results(request, name):
         spliced = last_first.split(",")
         first_last = ""
         for i in range(len(spliced)):
-            first_last = first_last + spliced[len(spliced) - 1 - i]
+            first_last = first_last.strip() + " " + spliced[len(spliced) - 1 - i]
         try:
             professor.append(Professor.objects.get(name__contains=first_last[0:len(first_last) - 1]))
         except:
-            new_professor = Professor(name=first_last, school=professor[1], lastUpdated=timezone.now(), hitCounter=0)
+            print(len(first_last))
+            print(len(professor[1]))
+            new_professor = Professor(name=first_last, school=professor[1], lastUpdated=timezone.datetime(2011, 1, 1), hitCounter=0)
             new_professor.save()
             professor.append(new_professor)
     return render(request, 'reviewer/results.html', {'professors': professors})
