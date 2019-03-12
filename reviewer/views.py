@@ -10,7 +10,8 @@ from django.utils import timezone
 def index(request):
     popular_list = sorted(Professor.objects.all(), key=lambda professor: professor.hitCounter, reverse=True)[:5]
     last_updated_list = sorted(Professor.objects.all(), key=lambda professor: professor.lastUpdated, reverse=True)[:5]
-    context = {'last_updated_list': last_updated_list, 'popular_list': popular_list}
+    total = len(Professor.objects.all())
+    context = {'last_updated_list': last_updated_list, 'popular_list': popular_list, 'total': total}
     return render(request, "reviewer/index.html", context)
 
 def professor(request, id):
@@ -33,10 +34,13 @@ def results(request, name):
         for i in range(len(spliced)):
             first_last = first_last.strip() + " " + spliced[len(spliced) - 1 - i]
         try:
-            professor.append(Professor.objects.get(name__contains=first_last[0:len(first_last) - 1]))
+            prof_object = Professor.objects.get(name__contains=first_last[0:len(first_last) - 1]).objects.get(school__contains=professor[1])
+            professor.append(prof_object)
         except:
             print(len(first_last))
             print(len(professor[1]))
+            # professor doesn't exist
+            # add a new professor to the database
             new_professor = Professor(name=first_last, school=professor[1], lastUpdated=timezone.datetime(2011, 1, 1), hitCounter=0)
             new_professor.save()
             professor.append(new_professor)
