@@ -3,7 +3,7 @@ from django.http import Http404
 # Create your views here.
 from django.http import HttpResponse
 from django.template import loader
-from .models import Professor
+from .models import Professor, RateMyProfSnapshot, Review
 from RMPScraper import getRMPReviews, ProfessorSearch
 from django.utils import timezone
 
@@ -18,7 +18,18 @@ def professor(request, id):
     try:
         professor = Professor.objects.get(id=id)
         professor.hitCounter = professor.hitCounter + 1
+        if professor.needsUpdated:
+            text_reviews = getRMPReviews("http://www.ratemyprofessors.com" + professor.rmpLink)
+            snapshot = RateMyProfSnapshot(url=professor.rmpLink)
+            snapshot.save()
+            professor.ratingPages.add(snapshot)
+            for review in text_reviews:
+                database_review = Review(text=review)
+                database_review.save()
+                snapshot.reviews.add(database_review)
         professor.lastUpdated = timezone.now()
+        snapshot.save()
+        database_review.save()
         professor.save()
     except Professor.DoesNotExist:
         raise Http404("Professor does not exist.")
@@ -41,7 +52,7 @@ def results(request, name):
             print(len(professor[1]))
             # professor doesn't exist
             # add a new professor to the database
-            new_professor = Professor(name=first_last, school=professor[1], lastUpdated=timezone.datetime(2011, 1, 1), hitCounter=0)
+            new_professor = Professor(name=first_last, school=professor[1], lastUpdated=timezone.datetime(2011, 1, 1), hitCounter=0, rmpLink=professor[2])
             new_professor.save()
             professor.append(new_professor)
     return render(request, 'reviewer/results.html', {'professors': professors})

@@ -1,5 +1,6 @@
 from django.db import models
-
+import datetime
+from django.utils import timezone
 # Create your models here.
 
 class Course(models.Model):
@@ -9,8 +10,7 @@ class Course(models.Model):
         return self.name
 
 class Review(models.Model):
-    text = models.TextField
-    rating = models.TextField
+    text = models.CharField(max_length=500)
 
 class RateMyProfSnapshot(models.Model):
     url = models.URLField()
@@ -21,9 +21,13 @@ class Professor(models.Model):
     name = models.CharField(max_length=50)
     courses = models.ManyToManyField(Course)
     school = models.CharField(max_length=100)
+    rmpLink = models.CharField(max_length=50)
     ratingPages = models.ManyToManyField(RateMyProfSnapshot)
     lastUpdated = models.DateTimeField()
     hitCounter = models.IntegerField()
+    def needsUpdated(self):
+        #return not self.lastUpdated >= timezone.now() - datetime.timedelta(days=1)
+        return true
     def __str__(self):
         return self.name
 
