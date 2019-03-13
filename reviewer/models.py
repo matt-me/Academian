@@ -27,7 +27,7 @@ class Professor(models.Model):
     hitCounter = models.IntegerField()
     def needsUpdated(self):
         #return not self.lastUpdated >= timezone.now() - datetime.timedelta(days=1)
-        return true
+        return True
     def __str__(self):
         return self.name
 
