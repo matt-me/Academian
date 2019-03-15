@@ -40,11 +40,18 @@
     </ul>
   </div>
 </nav>
+<div class="container">
 <h1>Professor {{professor.name}}</h1>
 <h2>{{professor.school}}</h2>
-Reviews:
+<h3>Reviews:</h3>
 {% for ratingPage in professor.ratingPages.all %}
   {% for review in ratingPage.reviews.all %}
-    <p>{{review.text}}</p>
+  <div class="card">
+    <div class="card-body bg-dark">
+      <p class="card-text">{{review.text}}</p>
+    </div>
+  </div>
   {% endfor %}
 {% endfor %}
+<center>Last updated: {{professor.lastUpdated}}</center>
+</div>

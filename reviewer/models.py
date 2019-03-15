@@ -25,9 +25,8 @@ class Professor(models.Model):
     ratingPages = models.ManyToManyField(RateMyProfSnapshot)
     lastUpdated = models.DateTimeField()
     hitCounter = models.IntegerField()
-    def needsUpdated(self):
-        #return not self.lastUpdated >= timezone.now() - datetime.timedelta(days=1)
-        return True
+    def needsUpdated(self): # hasn't been updated in 24 hours
+        return not self.lastUpdated >= timezone.now() - datetime.timedelta(days=1)
     def __str__(self):
         return self.name
 

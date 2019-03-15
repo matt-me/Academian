@@ -10,15 +10,17 @@ from django.utils import timezone
 def index(request):
     popular_list = sorted(Professor.objects.all(), key=lambda professor: professor.hitCounter, reverse=True)[:5]
     last_updated_list = sorted(Professor.objects.all(), key=lambda professor: professor.lastUpdated, reverse=True)[:5]
-    total = len(Professor.objects.all())
-    context = {'last_updated_list': last_updated_list, 'popular_list': popular_list, 'total': total}
+    total_professors = len(Professor.objects.all())
+    total_reviews = len(Review.objects.all())
+    context = {'last_updated_list': last_updated_list, 'popular_list': popular_list, 'total_professors': total_professors, 'total_reviews': total_reviews}
     return render(request, "reviewer/index.html", context)
 
 def professor(request, id):
     try:
         professor = Professor.objects.get(id=id)
         professor.hitCounter = professor.hitCounter + 1
-        if professor.needsUpdated:
+        if professor.needsUpdated():
+            #print("http://www.ratemyprofessors.com" + professor.rmpLink)
             text_reviews = getRMPReviews("http://www.ratemyprofessors.com" + professor.rmpLink)
             snapshot = RateMyProfSnapshot(url=professor.rmpLink)
             snapshot.save()
@@ -28,15 +30,12 @@ def professor(request, id):
                 database_review.save()
                 snapshot.reviews.add(database_review)
         professor.lastUpdated = timezone.now()
-        snapshot.save()
-        database_review.save()
         professor.save()
     except Professor.DoesNotExist:
         raise Http404("Professor does not exist.")
     return render(request, 'reviewer/professor.html', {'professor': professor})
 
 def results(request, name):
-    # TODO also get results from peoplefinder gmu
     professors = ProfessorSearch(name)
     for professor in professors:
         last_first = professor[0]
@@ -48,11 +47,12 @@ def results(request, name):
             prof_object = Professor.objects.get(name__contains=first_last[0:len(first_last) - 1]).objects.get(school__contains=professor[1])
             professor.append(prof_object)
         except:
-            print(len(first_last))
-            print(len(professor[1]))
+            #print(len(first_last))
+            #print(len(professor[1]))
             # professor doesn't exist
             # add a new professor to the database
             new_professor = Professor(name=first_last, school=professor[1], lastUpdated=timezone.datetime(2011, 1, 1), hitCounter=0, rmpLink=professor[2])
             new_professor.save()
             professor.append(new_professor)
     return render(request, 'reviewer/results.html', {'professors': professors})
+    
