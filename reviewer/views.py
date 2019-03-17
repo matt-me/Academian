@@ -8,11 +8,11 @@ from RMPScraper import getRMPReviews, ProfessorSearch
 from django.utils import timezone
 
 def index(request):
-    popular_list = sorted(Professor.objects.all(), key=lambda professor: professor.hitCounter, reverse=True)[:5]
-    last_updated_list = sorted(Professor.objects.all(), key=lambda professor: professor.lastUpdated, reverse=True)[:5]
+    popular_professors = sorted(Professor.objects.all(), key=lambda professor: professor.hitCounter, reverse=True)[:5]
+    recent_professors = sorted(Professor.objects.all(), key=lambda professor: professor.lastUpdated, reverse=True)[:5]
     total_professors = len(Professor.objects.all())
     total_reviews = len(Review.objects.all())
-    context = {'last_updated_list': last_updated_list, 'popular_list': popular_list, 'total_professors': total_professors, 'total_reviews': total_reviews}
+    context = {'recent_professors': recent_professors, 'popular_professors': popular_professors, 'total_professors': total_professors, 'total_reviews': total_reviews}
     return render(request, "reviewer/index.html", context)
 
 def professor(request, id):
@@ -26,7 +26,7 @@ def professor(request, id):
             snapshot.save()
             professor.ratingPages.add(snapshot)
             for review in text_reviews:
-                database_review = Review(text=review)
+                database_review = Review(text=review[0], date=review[1])
                 database_review.save()
                 snapshot.reviews.add(database_review)
         professor.lastUpdated = timezone.now()
