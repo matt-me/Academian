@@ -40,18 +40,31 @@
     </ul>
   </div>
 </nav>
+
+
 <div class="container">
-<h1>Professor {{professor.name}}</h1>
-<h2>{{professor.school}}</h2>
-<h3>Reviews:</h3>
-{% for ratingPage in professor.ratingPages.all %}
-  {% for review in ratingPage.reviews.all %}
-  <div class="card">
-    <div class="card-body bg-dark">
-      <p class="card-text">{{review.text}}</p>
+
+  <h1>Professor {{professor.name}}</h1>
+  <h2>{{professor.school}}</h2>
+  <a href="#" class="list-group-item list-group-item-action flex-column align-items-start">
+    <div class="d-flex w-100 justify-content-between">
+      <h5 class="mb-1">All Reviews</h5>
     </div>
-  </div>
+  </a>
+  {% for ratingPage in professor.ratingPages.all %}
+  {% for review in ratingPage.reviews.all %}
+  <a href="#" class="list-group-item list-group-item-action flex-column align-items-start">
+    <div class="d-flex w-100 justify-content-between">
+      <small>
+      {% if review.isNew %}
+      <span class="badge badge-pill badge-warning">New</span>
+      {% endif %}
+        {{review.getDateString}}</small>
+      
+    </div>
+    <p class="mb-1">{{review.text}}</p>
+  </a>
   {% endfor %}
-{% endfor %}
-<center>Last updated: {{professor.lastUpdated}}</center>
-</div>
+  {% endfor %}
+    </div>
+    <center>Last updated: {{professor.lastUpdated}}</center>

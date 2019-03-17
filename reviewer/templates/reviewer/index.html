@@ -1,13 +1,13 @@
 {% load static %}
 
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
-  crossorigin="anonymous">
-<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
-  crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
-  crossorigin="anonymous"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
-  crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+  integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+  integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+  integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+  integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 <link rel="stylesheet" type="text/css" href="{% static 'reviewer/style.css' %}">
 <nav class="navbar navbar-expand-lg navbar-dark bg-black">
   <a class="navbar-brand" href="#">Find Mentor</a>
@@ -53,50 +53,51 @@
     </form>
   </p>
 </div>
-{% if last_updated_list %}
-<div class="container content">
-  <div class="card-columns">
-    <div class="card bg-dark">
-      <ul class="list-group list-group-horizontal-sm"></ul>
-      <div class="card-header">
-        Recent Searches:
-      </div>
+{% if recent_professors %}
+<div class=" container content">
+      <div class="card-columns">
+        <div class="card bg-dark">
+          <ul class="list-group list-group-horizontal-sm"></ul>
+          <div class="card-header">
+            Recent Searches:
+          </div>
 
-      <ul class="list-group list-group-flush">
-        {% for professor in last_updated_list %}
-        <li class="list-group-item bg-dark"><a href="/reviewer/professor/{{ professor.id }}/">{{ professor.name }},
-            {{professor.school}}</a></li>
-        {% endfor %}
-      </ul>
-    </div>
-    <div class="card bg-dark">
-      <ul class="list-group list-group-horizontal-sm"></ul>
-      <div class="card-header">
-        Most Popular Searches:
-      </div>
+          <ul class="list-group list-group-flush">
+            {% for professor in recent_professors %}
+            <li class="list-group-item bg-dark"><a href="/reviewer/professor/{{ professor.id }}/">
+                {% if professor.hasNew %}
+                <span class="badge badge-pill badge-warning">New</span>
+                {% endif %}
+                {{ professor.name }},
+                {{ professor.school}}
+                <span class="badge badge-light">{{professor.reviewCount}}</span>
+              </a>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="card bg-dark">
+          <ul class="list-group list-group-horizontal-sm"></ul>
+          <div class="card-header">
+            Most Popular Searches:
+          </div>
 
-      <ul class="list-group list-group-flush">
-        {% for professor in popular_list %}
-        <li class="list-group-item bg-dark"><a href="/reviewer/professor/{{ professor.id }}/">{{ professor.name }},
-            {{professor.school}}</a></li>
-        {% endfor %}
-      </ul>
-      </ul>
-    </div>
-  </div>
+          <ul class="list-group list-group-flush">
+            {% for professor in popular_professors %}
+            <li class="list-group-item bg-dark"><a href="/reviewer/professor/{{ professor.id }}/">
+                {% if professor.hasNew %}
+                <span class="badge badge-pill badge-warning">New</span>
+                {% endif %}
+                {{ professor.name }}, {{ professor.school}}
+                <span class="badge badge-light">{{professor.reviewCount}}</span>
+              </a>
+            </li>
+            {% endfor %}
+          </ul>
+          </ul>
+        </div>
+      </div>
 </div>
-<!--p>Most recently searched for professors:</p>
-<ul>
-  {% for professor in last_updated_list %}
-  <li><a href="/reviewer/professor/{{ professor.id }}/">{{ professor.name }}, {{professor.school}}</a></li>
-  {% endfor %}
-</ul>
-<p>Most popular professors:</p>
-<ul>
-  {% for professor in popular_list %}
-  <li><a href="/reviewer/professor/{{ professor.id }}/">{{ professor.name }}, {{professor.school}}</a></li>
-  {% endfor %}
-</ul>-->
 <p></p>
 {% else %}
 <p>No professor information is available.</p>
