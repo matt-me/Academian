@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 import urllib.request
-
+import datetime
 def ProfessorSearch(prof_name):
     prof_name = prof_name.replace("_", "+")
     #print(prof_name)
@@ -32,20 +32,19 @@ def getRMPReviews(link):
     reviews = soup.findAll(name="tr")
     #print(len(reviews))
     for review in reviews:
-        rating = BeautifulSoup(str(review), "html.parser").find(name="td", attrs={"rating"})
-        comment = BeautifulSoup(str(review), "html.parser").find(name="p", attrs={"commentsParagraph"})
+        string_review = str(review)
+        rating = BeautifulSoup(string_review, "html.parser").find(name="td", attrs={"rating"})
+        comment = BeautifulSoup(string_review, "html.parser").find(name="p", attrs={"commentsParagraph"})
         try:
-            #print(rating.getText().strip().replace("\n\n\n\n", "\n").replace("\n\n", "\n"))
-            for line in rating.getText().strip():
+            date = None
+            for line in rating.getText().strip().split():
                 if len(line) > 2:
-                    date = str(line).split("/")
-                    if len(date) is 3: # if the line can be formatted into a date
-                        result.append(date[0] +  "/" + date[1] + "/" + date[2])
-                        print(date[0] +  "/" + date[1] + "/" + date[2])
-            print(comment.getText().strip())
-            result.append(comment.getText().strip())
+                    string_date = str(line).split("/")
+                    if len(string_date) is 3: # if the line can be formatted into a date
+                        date = datetime.date(int(string_date[2]), int(string_date[0]), int(string_date[1]))
+            result.append([comment.getText().strip(), date])
         except:
             pass
     return result
 
-#getRMPReviews("http://www.ratemyprofessors.com/ShowRatings.jsp?tid=735533")
+getRMPReviews("http://www.ratemyprofessors.com/ShowRatings.jsp?tid=735533")
