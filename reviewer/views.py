@@ -44,13 +44,11 @@ def results(request, name):
         for i in range(len(spliced)):
             first_last = first_last.strip() + " " + spliced[len(spliced) - 1 - i]
         try:
-            prof_object = Professor.objects.get(name__contains=first_last[0:len(first_last) - 1]).objects.get(school__contains=professor[1])
+            print("Searching for: " + first_last[0:len(first_last)])
+            print("Contains: " + professor[1])
+            prof_object = Professor.objects.get(name__contains=first_last[0:len(first_last)], school__contains=professor[1])
             professor.append(prof_object)
-        except:
-            #print(len(first_last))
-            #print(len(professor[1]))
-            # professor doesn't exist
-            # add a new professor to the database
+        except Professor.DoesNotExist:
             new_professor = Professor(name=first_last, school=professor[1], lastUpdated=timezone.datetime(2011, 1, 1), hitCounter=0, rmpLink=professor[2])
             new_professor.save()
             professor.append(new_professor)

@@ -18,7 +18,7 @@ class Review(models.Model):
     def getDateString(self): # returns which semester the review was written during (e.g Spring 2018)
         if (self.date.month >= 1 and self.date.month <= 5): # Spring semester
             return "Spring " + str(self.date.year)
-        if (self.date.month >= 6 and self.date.month <= 8): # Fall semester
+        if (self.date.month >= 6 and self.date.month <= 8): # Summer semester
             return "Summer " + str(self.date.year)
         else:
             return "Fall " + str(self.date.year)
