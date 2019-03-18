@@ -3,7 +3,7 @@ from django.http import Http404
 # Create your views here.
 from django.http import HttpResponse
 from django.template import loader
-from .models import Professor, RateMyProfSnapshot, Review
+from .models import Professor, ReviewSnapshot, Review
 from RMPScraper import getRMPReviews, ProfessorSearch
 from django.utils import timezone
 
@@ -20,13 +20,12 @@ def professor(request, id):
         professor = Professor.objects.get(id=id)
         professor.hitCounter = professor.hitCounter + 1
         if professor.needsUpdated():
-            #print("http://www.ratemyprofessors.com" + professor.rmpLink)
             text_reviews = getRMPReviews("http://www.ratemyprofessors.com" + professor.rmpLink)
-            snapshot = RateMyProfSnapshot(url=professor.rmpLink)
+            snapshot = ReviewSnapshot(rmp_url=professor.rmpLink)
             snapshot.save()
             professor.ratingPages.add(snapshot)
             for review in text_reviews:
-                database_review = Review(text=review[0], date=review[1])
+                database_review = Review(text=review[0], date=review[1], source="ratemyprofessor")
                 database_review.save()
                 snapshot.reviews.add(database_review)
         professor.lastUpdated = timezone.now()

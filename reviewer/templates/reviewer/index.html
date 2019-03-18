@@ -65,13 +65,13 @@
           <ul class="list-group list-group-flush">
             {% for professor in recent_professors %}
             <li class="list-group-item bg-dark"><a href="/reviewer/professor/{{ professor.id }}/">
-                {% if professor.hasNew %}
-                <span class="badge badge-pill badge-warning">New</span>
-                {% endif %}
-                {{ professor.name }},
-                {{ professor.school}}
-                <span class="badge badge-light">{{professor.reviewCount}}</span>
+                <h5>{{ professor.name }}</h5>
+                <h6>{{ professor.school}}</h6>
               </a>
+              {% if professor.hasNew %}
+                <span class="badge badge-warning">New</span>
+                {% endif %}
+                <span class="badge badge-light">{{professor.reviewCount}} Reviews</span>
               </li>
             {% endfor %}
           </ul>
@@ -85,11 +85,13 @@
           <ul class="list-group list-group-flush">
             {% for professor in popular_professors %}
             <li class="list-group-item bg-dark"><a href="/reviewer/professor/{{ professor.id }}/">
+                
+                <h5>{{ professor.name }}</h5>
+                <h6>{{ professor.school}}</h6>
+                <span class="badge badge-light">{{professor.reviewCount}} Reviews</span>
                 {% if professor.hasNew %}
-                <span class="badge badge-pill badge-warning">New</span>
+                <span class="badge badge-warning">New</span>
                 {% endif %}
-                {{ professor.name }}, {{ professor.school}}
-                <span class="badge badge-light">{{professor.reviewCount}}</span>
               </a>
             </li>
             {% endfor %}

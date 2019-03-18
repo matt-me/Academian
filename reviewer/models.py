@@ -13,6 +13,7 @@ class Course(models.Model):
 class Review(models.Model):
     text = models.CharField(max_length=500)
     date = models.DateField()
+    source = models.CharField(max_length=20)
     def isNew(self):
         return pytz.utc.localize(datetime.datetime.combine(self.date, datetime.time(0, 0, 0))) >= timezone.now() - datetime.timedelta(days=60)
     def getDateString(self): # returns which semester the review was written during (e.g Spring 2018)
@@ -23,8 +24,8 @@ class Review(models.Model):
         else:
             return "Fall " + str(self.date.year)
 
-class RateMyProfSnapshot(models.Model):
-    url = models.URLField()
+class ReviewSnapshot(models.Model):
+    rmp_url = models.URLField()
     professor_name = models.CharField(max_length=50)
     reviews = models.ManyToManyField(Review)
 
@@ -33,7 +34,7 @@ class Professor(models.Model):
     courses = models.ManyToManyField(Course)
     school = models.CharField(max_length=100)
     rmpLink = models.CharField(max_length=50)
-    ratingPages = models.ManyToManyField(RateMyProfSnapshot)
+    ratingPages = models.ManyToManyField(ReviewSnapshot)
     lastUpdated = models.DateTimeField()
     hitCounter = models.IntegerField()
     def needsUpdated(self): # hasn't been updated in 24 hours
