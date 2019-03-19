@@ -26,10 +26,11 @@
           Recents
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-          <a class="dropdown-item" href="#">Action</a>
-          <a class="dropdown-item" href="#">Another action</a>
+          {% for professor in prof_history %}
+            <a class="dropdown-item" href="/professor/{{ professor.id}}">professor.name</a>
+          {% endfor %}
           <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="#">Something else here</a>
+          <a class="dropdown-item" href="#">Clear History</a>
         </div>
       </li>
       <li class="nav-item">
