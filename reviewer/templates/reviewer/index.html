@@ -58,7 +58,7 @@
       <div class="card-columns">
         <div class="card bg-dark">
           <ul class="list-group list-group-horizontal-sm"></ul>
-          <div class="card-header">
+          <div class="card-header text-primary">
             Recent Searches:
           </div>
 
@@ -78,22 +78,25 @@
         </div>
         <div class="card bg-dark">
           <ul class="list-group list-group-horizontal-sm"></ul>
-          <div class="card-header">
+          <div class="card-header text-primary">
             Most Popular Searches:
           </div>
 
           <ul class="list-group list-group-flush">
             {% for professor in popular_professors %}
-            <li class="list-group-item bg-dark"><a href="/reviewer/professor/{{ professor.id }}/">
+            <a href="/reviewer/professor/{{ professor.id }}/">
+            <li class="list-group-item bg-dark">
                 
-                <h5>{{ professor.name }}</h5>
-                <h6>{{ professor.school}}</h6>
-                <span class="badge badge-light">{{professor.reviewCount}} Reviews</span>
+                <h5 class="text-secondary">{{ professor.name }} </h5>
+                <h6 class="text-green">{{ professor.school}}</h6>
+                
                 {% if professor.hasNew %}
                 <span class="badge badge-warning">New</span>
                 {% endif %}
-              </a>
+                <span class="badge badge-secondary"> {{professor.reviewCount}} Reviews</span>
+              
             </li>
+          </a>
             {% endfor %}
           </ul>
           </ul>

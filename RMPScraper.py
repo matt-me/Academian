@@ -14,10 +14,8 @@ def ProfessorSearch(prof_name):
         # get all of the results on the first page
         page_link = BeautifulSoup(str(result), "html.parser").a
         name = BeautifulSoup(str(page_link), "html.parser").findAll(name="span", attrs={"main"})[0].getText()
-        school = BeautifulSoup(str(page_link), "html.parser").findAll(name="span", attrs={"sub"})[0].getText()
-        #print(name)
-        #print(school)
-        #print(page_link["href"])
+        school_subject = BeautifulSoup(str(page_link), "html.parser").findAll(name="span", attrs={"sub"})[0].getText()
+        school = school_subject.split(",")[0]
         professors.append([name, school, page_link["href"]])
     return professors
 

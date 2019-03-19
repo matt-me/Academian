@@ -45,19 +45,19 @@
   <h1>Professor {{professor.name}}</h1>
   <h2>{{professor.school}}</h2>
   <div class="container">
-    <a href="#" class="list-group-item list-group-item-action flex-column align-items-start">
+    <a href="#" class="list-group-item list-group-item-action flex-column align-items-start bg-dark">
       <div class="d-flex w-100 justify-content-between">
-        <h5 class="mb-1">All Reviews</h5>
+        <h5 class="mb-1 text-primary">All Reviews</h5>
       </div>
     </a>
     {% for ratingPage in professor.ratingPages.all %}
-    {% for review in ratingPage.reviews.all %}
-    <a href="#" class="list-group-item list-group-item-action flex-column align-items-start">
+    {% for review in ratingPage.reviews.all%}
+    <a href="#" class="list-group-item list-group-item-action flex-column align-items-start bg-dark">
       <div class="d-flex w-100 justify-content-between">
 
 
       </div>
-      <p class="mb-1">{{review.text}}</p>
+      <p class="mb-1 text-secondary">{{review.text}}</p>
       <small>
         {% if review.isNew %}
         <span class="badge badge-pill badge-warning">New</span>
