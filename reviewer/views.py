@@ -6,23 +6,28 @@ from django.template import loader
 from .models import Professor, ReviewSnapshot, Review, Session
 from RMPScraper import getRMPReviews, ProfessorSearch
 from django.utils import timezone
-
-def getProfessorHistory(session_id):
-    session_obj = Session.objects.get(id=session_id)
-    prof_list = session_obj.history.all()
-    return prof_list
-
 def index(request):
+    # lists of the top 5 recent and popular professors
     popular_professors = sorted(Professor.objects.all(), key=lambda professor: professor.hitCounter, reverse=True)[:5]
     recent_professors = sorted(Professor.objects.all(), key=lambda professor: professor.lastUpdated, reverse=True)[:5]
+    # the following variables are numbers 
     total_professors = len(Professor.objects.all())
     total_reviews = len(Review.objects.all())
-    prof_history = getProfessorHistory(id)
+
+    session_obj = None
+    try:
+        session_id = request.COOKIES["session_id"] # this might have a dictionary error if the user doesn't have a session id yet
+        # it gets the cookie named "session_id"
+        session_obj = Session.objects.get(id=session_id)
+        prof_history = session_obj.history.all()
+    except:
+        prof_history = None
+    # no need to create a new session until the user actually goes to a professor page
     context = {'prof_history': prof_history, 'recent_professors': recent_professors, 'popular_professors': popular_professors, 'total_professors': total_professors, 'total_reviews': total_reviews}
     return render(request, "reviewer/index.html", context)
 
 def professor(request, id):
-    prof_history = getProfessorHistory(id)
+    session_obj = None
     try:
         professor = Professor.objects.get(id=id)
         professor.hitCounter = professor.hitCounter + 1
@@ -38,16 +43,24 @@ def professor(request, id):
         professor.lastUpdated = timezone.now()
         professor.save()
     except Professor.DoesNotExist:
+        # the professor should exist, as the only way to view a professor page is to use the search function
+        # which generates professor pages when it is used
         raise Http404("Professor does not exist.")
-    response = render(request, 'reviewer/professor.html', {'prof_history': prof_history, 'professor': professor})
+   
     try:
         session_id = request.COOKIES["session_id"]
-        my_session = getProfessorHistory(session_id)
-        my_session.history.add(id)
-    except:
-        new_session = Session()
-        new_session.save()
-        response.set_cookie(key="session_id", value=new_session.id)
+        # See if the user has a valid session
+        session_obj = Session.objects.get(id=session_id)
+    except (TypeError, KeyError, ValueError) as e:
+        # else create a new session
+        session_obj = Session()
+        session_obj.save()
+        session_id = session_obj.id
+        print(session_obj.id)
+    session_obj.history.add(Professor.objects.get(id=id))
+    session_obj.save()
+    response = render(request, 'reviewer/professor.html', {'prof_history': session_obj.history.all(), 'professor': professor})
+    response.set_cookie("session_id", session_id)
     return response
 
 def results(request, name):
