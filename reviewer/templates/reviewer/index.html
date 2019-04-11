@@ -21,17 +21,19 @@
         <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
       </li>
       <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
-          aria-haspopup="true" aria-expanded="false">
-          Recents
-        </a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-          <a class="dropdown-item" href="#">Action</a>
-          <a class="dropdown-item" href="#">Another action</a>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="#">Something else here</a>
-        </div>
-      </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">
+            Recents
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            {% for professor in prof_history %}
+              <a class="dropdown-item" href="/professor/{{ professor.id}}">{{professor.name}}</a>
+            {% endfor %}
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="#">Clear History</a>
+          </div>
+        </li>
       <li class="nav-item">
         <a class="nav-link" href="/reviewer/about.html">About</a>
       </li>
@@ -64,14 +66,17 @@
 
           <ul class="list-group list-group-flush">
             {% for professor in recent_professors %}
-            <li class="list-group-item bg-dark"><a href="/reviewer/professor/{{ professor.id }}/">
-                <h5>{{ professor.name }}</h5>
-                <h6>{{ professor.school}}</h6>
-              </a>
-              {% if professor.hasNew %}
+            <a href="/reviewer/professor/{{ professor.id }}/">
+            <li class="list-group-item bg-dark">
+              
+                <h5 class="text-primary">{{ professor.name }}</h5>
+                <h6 class="text-secondary">{{ professor.school}}</h6>
+                {% if professor.hasNew %}
                 <span class="badge badge-warning">New</span>
                 {% endif %}
                 <span class="badge badge-light">{{professor.reviewCount}} Reviews</span>
+              </a>
+              
               </li>
             {% endfor %}
           </ul>
@@ -87,8 +92,8 @@
             <a href="/reviewer/professor/{{ professor.id }}/">
             <li class="list-group-item bg-dark">
                 
-                <h5 class="text-secondary">{{ professor.name }} </h5>
-                <h6 class="text-green">{{ professor.school}}</h6>
+                <h5 class="text-primary">{{ professor.name }} </h5>
+                <h6 class="text-secondary">{{ professor.school}}</h6>
                 
                 {% if professor.hasNew %}
                 <span class="badge badge-warning">New</span>
