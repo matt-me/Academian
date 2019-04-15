@@ -6,6 +6,7 @@ from django.template import loader
 from .models import Professor, ReviewSnapshot, Review, Session
 from RMPScraper import getRMPReviews, ProfessorSearch
 from django.utils import timezone
+
 def index(request):
     # lists of the top 5 recent and popular professors
     popular_professors = sorted(Professor.objects.all(), key=lambda professor: professor.hitCounter, reverse=True)[:5]
@@ -37,14 +38,25 @@ def professor(request, id):
             snapshot.save()
             professor.ratingPages.add(snapshot)
             for review in text_reviews:
-                database_review = Review(text=review[0], date=review[1], source="ratemyprofessor")
-                database_review.save()
-                snapshot.reviews.add(database_review)
+                database_review = Review(date=review[1], source="ratemyprofessor")
+                database_review.setText(review[0])
+                #check for a duplicate review (if two reviews have identical text fields)
+                should_save = True
+                for ratingPage in professor.ratingPages.all():
+                    for other_review in ratingPage.reviews.all():
+                        if database_review.text_hash == other_review.text_hash:
+                            # don't save, because this is a duplicate review
+                            should_save = False
+                            print("duplicate review detected")
+                if should_save: # if this is not a duplicate review
+                    database_review.save()
+                    snapshot.reviews.add(database_review)
         professor.lastUpdated = timezone.now()
+        #professor.removeDuplicateReviews()
         professor.save()
     except Professor.DoesNotExist:
         # the professor should exist, as the only way to view a professor page is to use the search function
-        # which generates professor pages when it is used
+        # which generates professor pages on search results
         raise Http404("Professor does not exist.")
    
     try:
