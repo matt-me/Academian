@@ -9,7 +9,7 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
   integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 <link rel="stylesheet" type="text/css" href="{% static 'reviewer/style.css' %}">
-<link rel="icon" href="/favicon.png">
+<link rel="icon" href="favicon.png">
 <nav class="navbar navbar-expand-lg navbar-dark bg-black">
   <a class="navbar-brand" href="#">Find Mentor</a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
@@ -42,7 +42,6 @@
     </ul>
   </div>
 </nav>
-
 <div class="jumbotron bg-dark">
   <h1 class="display-4">Looking for a professor?</h1>
   <!---p class="lead">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to
@@ -50,10 +49,18 @@
   <hr class="my-4">
   There are currently {{total_professors}} professors and {{total_reviews}} reviews in the database.
   <p class="lead">
-    <form class="form-inline my-2 my-lg-0" action="/reviewer/search/{% " method="GET">
-      <input class="form-control mr-sm-2" type="search" placeholder="Enter professor name" aria-label="Search">
-      <button type="submit" class="btn" value="Submit">Search</button>
+    <form class="form-inline my-2 my-lg-0" id="searchform">
+      <input class="form-control mr-sm-2" id="searchbar" type="search" placeholder="Enter professor name" aria-label="Search">
+      <button type="submit" class="btn" id="searchbtn" value="Submit">Search</button>
+      <script type="text/javascript">
+        document.getElementById('searchform').onsubmit = function() {
+            window.location = 'search/' + document.getElementById('searchbar').value;
+            return false;
+        }
+      </script>
     </form>
+    
+     
   </p>
 </div>
 {% if recent_professors %}
