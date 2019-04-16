@@ -48,6 +48,7 @@ class Professor(models.Model):
     name = models.CharField(max_length=50)
     courses = models.ManyToManyField(Course)
     school = models.CharField(max_length=100)
+    department = models.CharField(max_length=100)
     rmpLink = models.CharField(max_length=50)
     ratingPages = models.ManyToManyField(ReviewSnapshot)
     lastUpdated = models.DateTimeField()

@@ -16,12 +16,12 @@ def ProfessorSearch(prof_name):
         name = BeautifulSoup(str(page_link), "html.parser").findAll(name="span", attrs={"main"})[0].getText()
         school_subject = BeautifulSoup(str(page_link), "html.parser").findAll(name="span", attrs={"sub"})[0].getText()
         school = school_subject.split(",")[0]
-        professors.append([name, school, page_link["href"]])
+        subject = school_subject.split(",")[1]
+        professors.append([name, school, page_link["href"], subject])
     return professors
 
 def SchoolSearch(prof_name):
     prof_name = prof_name.replace("_", "+")
-    #print(prof_name)
     site = "http://www.ratemyprofessors.com/search.jsp?queryoption=HEADER&queryBy=schoolName&query=" + prof_name
     document = urllib.request.urlopen(site).read()
     soup = BeautifulSoup(document, "html.parser")
