@@ -61,8 +61,10 @@
       <div class="card-columns">
         <div class="card bg-dark">
           <ul class="list-group list-group-horizontal-sm"></ul>
-          <div class="card-header text-primary">
+          <div class="card-header text-light">
+            <h5>
             Recent Searches:
+          </h5>
           </div>
 
           <ul class="list-group list-group-flush">
@@ -80,8 +82,10 @@
         </div>
         <div class="card bg-dark">
           <ul class="list-group list-group-horizontal-sm"></ul>
-          <div class="card-header text-primary">
+          <div class="card-header text-light">
+              <h5>
             Most Popular Searches:
+                </h5>
           </div>
 
           <ul class="list-group list-group-flush">
@@ -93,7 +97,7 @@
                 {% if professor.hasNew %}
                 <span class="badge badge-warning">New</span>
                 {% endif %}
-                <span class="badge badge-secondary"> {{professor.reviewCount}} Reviews</span>
+                <span class="badge badge-light"> {{professor.reviewCount}} Reviews</span>
           </a>
             {% endfor %}
           </ul>
