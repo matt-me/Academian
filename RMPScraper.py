@@ -19,6 +19,23 @@ def ProfessorSearch(prof_name):
         professors.append([name, school, page_link["href"]])
     return professors
 
+def SchoolSearch(prof_name):
+    prof_name = prof_name.replace("_", "+")
+    #print(prof_name)
+    site = "http://www.ratemyprofessors.com/search.jsp?queryoption=HEADER&queryBy=schoolName&query=" + prof_name
+    document = urllib.request.urlopen(site).read()
+    soup = BeautifulSoup(document, "html.parser")
+    results = soup.findAll(name="li", attrs={"listing SCHOOL"})
+    #print("Found " + str(len(results)) + " results.")
+    schools = []
+    for result in results:
+        # get all of the results on the first page
+        page_link = BeautifulSoup(str(result), "html.parser").a
+        name = BeautifulSoup(str(page_link), "html.parser").findAll(name="span", attrs={"main"})[0].getText()
+        location = BeautifulSoup(str(page_link), "html.parser").findAll(name="span", attrs={"sub"})[0].getText()
+        schools.append([name, location, page_link["href"]])
+    return schools
+
 #Given a link to a RMP webpage, extract the reviews from it
 def getRMPReviews(link):
     result = []
@@ -46,3 +63,4 @@ def getRMPReviews(link):
     return result
 
 getRMPReviews("http://www.ratemyprofessors.com/ShowRatings.jsp?tid=735533")
+print(SchoolSearch("G"))
