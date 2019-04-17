@@ -35,11 +35,11 @@
 </nav>
 <div class="container">
   {% for professor in professors %}
-      <a href="/reviewer/professor/{{ professor.3.id }}/" class="list-group-item list-group-item-action flex-column align-items-start bg-dark">
+      <a href="/reviewer/professor/{{ professor.id }}/" class="list-group-item list-group-item-action flex-column align-items-start bg-dark">
           <div class="d-flex w-100 justify-content-between">
           </div>
-          <p class="mb-1 text-white">{{ professor.3 }}</p>
-          <p class="mb-1 text-info">{{ professor.1 }}</p>
+          <p class="mb-1 text-white">{{ professor.name }}</p>
+          <p class="mb-1 text-info">{{ professor.school }}</p>
           <small>
             {% if professor.hasNew %}
             <span class="badge badge-pill badge-warning">New</span>

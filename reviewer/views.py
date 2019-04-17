@@ -77,6 +77,7 @@ def professor(request, id):
 
 def results(request, name):
     professors = ProfessorSearch(name)
+    professor_list = []
     for professor in professors:
         last_first = professor[0]
         spliced = last_first.split(",")
@@ -87,10 +88,10 @@ def results(request, name):
             print("Searching for: " + first_last[0:len(first_last)])
             print("Contains: " + professor[1])
             prof_object = Professor.objects.get(name__contains=first_last[0:len(first_last)], school__contains=professor[1])
-            professor.append(prof_object)
+            professor_list.append(prof_object)
         except Professor.DoesNotExist:
             new_professor = Professor(name=first_last, school=professor[1], department=professor[3], lastUpdated=timezone.datetime(2011, 1, 1), hitCounter=0, rmpLink=professor[2])
             new_professor.save()
-            professor.append(new_professor)
-    return render(request, 'reviewer/results.html', {'professors': professors})
+            professor_list.append(new_professor)
+    return render(request, 'reviewer/results.html', {'professors': professor_list})
     
