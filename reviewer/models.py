@@ -17,6 +17,7 @@ class Review(models.Model):
     date = models.DateField()
     source = models.CharField(max_length=20)
     text_hash = models.CharField(max_length=53)
+    rating = models.CharField(max_length=20)
 
     def isNew(self):
         return pytz.utc.localize(datetime.datetime.combine(self.date, datetime.time(0, 0, 0))) >= timezone.now() - datetime.timedelta(days=60)

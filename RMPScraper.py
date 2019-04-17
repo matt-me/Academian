@@ -26,7 +26,6 @@ def SchoolSearch(prof_name):
     document = urllib.request.urlopen(site).read()
     soup = BeautifulSoup(document, "html.parser")
     results = soup.findAll(name="li", attrs={"listing SCHOOL"})
-    #print("Found " + str(len(results)) + " results.")
     schools = []
     for result in results:
         # get all of the results on the first page
@@ -48,19 +47,22 @@ def getRMPReviews(link):
     #print(len(reviews))
     for review in reviews:
         string_review = str(review)
-        rating = BeautifulSoup(string_review, "html.parser").find(name="td", attrs={"rating"})
+        rating_blob = BeautifulSoup(string_review, "html.parser").find(name="td", attrs={"rating"})
         comment = BeautifulSoup(string_review, "html.parser").find(name="p", attrs={"commentsParagraph"})
         try:
             date = None
-            for line in rating.getText().strip().split():
+            rating = None
+            formatted_line = rating_blob.getText().strip().split()
+            for line in formatted_line:
                 if len(line) > 2:
                     string_date = str(line).split("/")
                     if len(string_date) is 3: # if the line can be formatted into a date
                         date = datetime.date(int(string_date[2]), int(string_date[0]), int(string_date[1]))
-            result.append([comment.getText().strip(), date])
+                elif line != "Level of Difficulty" and line != "Overall Quality" and not any(c.isdigit() for c in "hello wordl"):
+                    rating = line
+            result.append([comment.getText().strip(), date, rating])
         except:
             pass
     return result
 
-getRMPReviews("http://www.ratemyprofessors.com/ShowRatings.jsp?tid=735533")
-print(SchoolSearch("G"))
+print(getRMPReviews("http://www.ratemyprofessors.com/ShowRatings.jsp?tid=735533"))
