@@ -54,11 +54,11 @@ def getRMPReviews(link):
             rating = None
             formatted_line = rating_blob.getText().strip().split()
             for line in formatted_line:
-                if len(line) > 2:
+                if "/" in line:
                     string_date = str(line).split("/")
                     if len(string_date) is 3: # if the line can be formatted into a date
                         date = datetime.date(int(string_date[2]), int(string_date[0]), int(string_date[1]))
-                elif line != "Level of Difficulty" and line != "Overall Quality" and not any(c.isdigit() for c in "hello wordl"):
+                elif "awesome" in line or "poor" in line or "good" in line or "awful" in line or "average" in line:
                     rating = line
             result.append([comment.getText().strip(), date, rating])
         except:

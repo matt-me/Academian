@@ -38,7 +38,7 @@ def professor(request, id):
             snapshot.save()
             professor.ratingPages.add(snapshot)
             for review in text_reviews:
-                database_review = Review(date=review[1], source="ratemyprofessor")
+                database_review = Review(date=review[1], source="ratemyprofessor", rating=review[2])
                 database_review.setText(review[0])
                 #check for a duplicate review (if two reviews have identical text fields)
                 should_save = True
