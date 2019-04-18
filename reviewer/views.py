@@ -93,5 +93,7 @@ def results(request, name):
             new_professor = Professor(name=first_last, school=professor[1], department=professor[3], lastUpdated=timezone.datetime(2011, 1, 1), hitCounter=0, rmpLink=professor[2])
             new_professor.save()
             professor_list.append(new_professor)
-    return render(request, 'reviewer/results.html', {'professors': professor_list})
+    formatted_list = sorted(professor_list, key=lambda professor: professor.hitCounter)
+    formatted_list.reverse() #sorted returns it in the opposite order
+    return render(request, 'reviewer/results.html', {'professors': formatted_list})
     
