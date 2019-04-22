@@ -76,7 +76,36 @@ class Professor(models.Model):
                     for otherReview in ratingPage.reviews.all():
                         if review.text_hash == otherReview.text_hash and review.id != otherReview.id:
                             otherReview.delete()
-                            print("removing duplicate review")
+    # see if there's a professor at the same school with a similar name
+    def getDopplegangers(self):
+        dopplegangers = []
+        professor_name_list = self.name.split(" ")
+        # get all of the professors teaching at this professor's school's department 
+        other_professors = Professor.objects.filter(school__contains=self.school, department__contains=self.department)
+        for professor in other_professors:
+            other_name_list = professor.name.split(" ")
+            if (len(professor_name_list) == len(other_name_list) and professor is not self):
+                # check to see if one of the professors names were shortened to an initial
+                # Ex. David Nordstrom and D Nordstrom
+                # TODO refactor this garbage
+                for i in range(len(other_name_list)):
+                    end_loop = False
+                    for j in range(len(professor_name_list)):
+                        if i == j and other_name_list[i][0] != professor_name_list[i][0]:
+                            end_loop = True
+                            break
+                        elif i != j and other_name_list[j] != professor_name_list[j]:
+                            end_loop = True
+                            break
+                    if end_loop:
+                        break
+                    else:
+                        dopplegangers.append(professor)
+        return dopplegangers
+        # returns professors that teach at a different school in the same subject with the same name
+    def getAlternateIdentities(self):
+        alternate_identities = Professor.objects.filter(name__contains=self.name, department__contains=self.department)
+        return alternate_identities
     def __str__(self):
         return self.name
 

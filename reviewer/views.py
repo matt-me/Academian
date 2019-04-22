@@ -47,7 +47,6 @@ def professor(request, id):
                         if database_review.text_hash == other_review.text_hash:
                             # don't save, because this is a duplicate review
                             should_save = False
-                            print("duplicate review detected")
                 if should_save: # if this is not a duplicate review
                     database_review.save()
                     snapshot.reviews.add(database_review)
@@ -71,7 +70,7 @@ def professor(request, id):
         print(session_obj.id)
     session_obj.history.add(Professor.objects.get(id=id))
     session_obj.save()
-    response = render(request, 'reviewer/professor.html', {'prof_history': session_obj.history.all(), 'professor': professor})
+    response = render(request, 'reviewer/professor.html', {'prof_history': session_obj.history.all(), 'professor': professor, 'dopplegangers': professor.getDopplegangers(), "alternate_identities": professor.getAlternateIdentities()})
     response.set_cookie("session_id", session_id)
     return response
 
@@ -85,8 +84,6 @@ def results(request, name):
         for i in range(len(spliced)):
             first_last = first_last.strip() + " " + spliced[len(spliced) - 1 - i]
         try:
-            print("Searching for: " + first_last[0:len(first_last)])
-            print("Contains: " + professor[1])
             prof_object = Professor.objects.get(name__contains=first_last[0:len(first_last)], school__contains=professor[1])
             professor_list.append(prof_object)
         except Professor.DoesNotExist:
