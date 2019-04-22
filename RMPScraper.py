@@ -65,4 +65,4 @@ def getRMPReviews(link):
             pass
     return result
 
-print(getRMPReviews("http://www.ratemyprofessors.com/ShowRatings.jsp?tid=735533"))
+#print(getRMPReviews("http://www.ratemyprofessors.com/ShowRatings.jsp?tid=735533"))
