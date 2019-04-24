@@ -84,7 +84,7 @@ def results(request, name):
         for i in range(len(spliced)):
             first_last = first_last.strip() + " " + spliced[len(spliced) - 1 - i]
         try:
-            prof_object = Professor.objects.get(name__contains=first_last[0:len(first_last)], school__contains=professor[1])
+            prof_object = Professor.objects.get(name=first_last[0:len(first_last)], school=professor[1])
             professor_list.append(prof_object)
         except Professor.DoesNotExist:
             new_professor = Professor(name=first_last, school=professor[1], department=professor[3], lastUpdated=timezone.datetime(2011, 1, 1), hitCounter=0, rmpLink=professor[2])
