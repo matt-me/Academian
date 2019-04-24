@@ -104,7 +104,8 @@ class Professor(models.Model):
         return dopplegangers
         # returns professors that teach at a different school in the same subject with the same name
     def getAlternateIdentities(self):
-        alternate_identities = Professor.objects.filter(name__contains=self.name, department__contains=self.department)
+        alternate_identities = Professor.objects.filter(name__contains=self.name, department__contains=self.department).exclude(school__contains=self.school)
+
         return alternate_identities
     def __str__(self):
         return self.name
