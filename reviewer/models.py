@@ -11,7 +11,13 @@ class Course(models.Model):
     school = models.CharField(max_length=100)
     def __str__(self):
         return self.name
-
+        
+class School(models.Model):
+    name = models.CharField(max_length=50)
+    subreddit = models.CharField(max_length=50)
+    def __str__(self):
+        return self.name
+    
 class Review(models.Model):
     text = models.CharField(max_length=500)
     date = models.DateField()
@@ -50,32 +56,33 @@ class Professor(models.Model):
     courses = models.ManyToManyField(Course)
     school = models.CharField(max_length=100)
     department = models.CharField(max_length=100)
-    rmpLink = models.CharField(max_length=50)
-    ratingPages = models.ManyToManyField(ReviewSnapshot)
-    lastUpdated = models.DateTimeField()
-    hitCounter = models.IntegerField()
+    rmp_link = models.CharField(max_length=50)
+    uloop_link = models.CharField(max_length=50)
+    rating_pages = models.ManyToManyField(ReviewSnapshot)
+    last_updated = models.DateTimeField()
+    hit_counter = models.IntegerField()
 
     def needsUpdated(self): # hasn't been updated in 24 hours
-        return not self.lastUpdated >= timezone.now() - datetime.timedelta(days=1)
+        return not self.last_updated >= timezone.now() - datetime.timedelta(days=1)
     
     def hasNew(self):
-        for ratingPage in self.ratingPages.all():
-            for review in ratingPage.reviews.all():
+        for rating_page in self.rating_pages.all():
+            for review in rating_page.reviews.all():
                 return pytz.utc.localize(datetime.datetime.combine(review.date, datetime.time(0, 0, 0))) >= timezone.now() - datetime.timedelta(days=60)
     
     def reviewCount(self):
         i = 0
-        for ratingPage in self.ratingPages.all():
-            for review in ratingPage.reviews.all():
+        for rating_page in self.rating_pages.all():
+            for review in rating_page.reviews.all():
                 i += 1
         return i
     def removeDuplicateReviews(self):
-        for ratingPage in self.ratingPages.all():
-            for review in ratingPage.reviews.all():
-                for otherRatingPage in self.ratingPages.all():
-                    for otherReview in ratingPage.reviews.all():
-                        if review.text_hash == otherReview.text_hash and review.id != otherReview.id:
-                            otherReview.delete()
+        for rating_page in self.rating_pages.all():
+            for review in rating_page.reviews.all():
+                for other_rating_page in self.rating_pages.all():
+                    for other_review in rating_page.reviews.all():
+                        if review.text_hash == other_review.text_hash and review.id != other_review.id:
+                            other_review.delete()
     # see if there's a professor at the same school with a similar name
     def getDopplegangers(self):
         dopplegangers = []
@@ -109,6 +116,13 @@ class Professor(models.Model):
         return alternate_identities
     def __str__(self):
         return self.name
+
+class ULoopReview(models.Model):
+    overall = models.IntegerField()
+    helpfulness = models.IntegerField()
+    clarity = models.IntegerField()
+    easiness = models.IntegerField()
+    review = models.OneToOneField(Review, on_delete=models.CASCADE)
 
 #This will keep track of the professors that the user has recently viewed
 class Session(models.Model):
