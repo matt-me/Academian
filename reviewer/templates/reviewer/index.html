@@ -29,7 +29,7 @@
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdown">
             {% for professor in prof_history %}
-              <a class="dropdown-item" href="/professor/{{ professor.id}}">{{professor.name}}</a>
+              <a class="dropdown-item" href="professor/{{ professor.id}}">{{professor.name}}</a>
             {% endfor %}
             <div class="dropdown-divider"></div>
             <a class="dropdown-item" href="#">Clear History</a>
@@ -54,7 +54,7 @@
       <button type="submit" class="btn" id="searchbtn" value="Submit">Search</button>
       <script type="text/javascript">
         document.getElementById('searchform').onsubmit = function() {
-            window.location = 'search/' + document.getElementById('searchbar').value;
+            window.location = 'search/' + document.getElementById('searchbar').value.replace(" ", "_");
             return false;
         }
       </script>

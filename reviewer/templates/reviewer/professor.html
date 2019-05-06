@@ -27,7 +27,7 @@
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
           {% for professor in prof_history %}
-            <a class="dropdown-item" href="/professor/{{ professor.id}}">{{professor.name}}</a>
+            <a class="dropdown-item" href="/reviewer/professor/{{ professor.id}}">{{professor.name}}</a>
           {% endfor %}
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="#">Clear History</a>
@@ -55,8 +55,8 @@
         <h5 class="mb-1 text-primary">All Reviews</h5>
       </div>
     </div>
-    {% for ratingPage in professor.ratingPages.all %}
-    {% for review in ratingPage.reviews.all%}
+    {% for rating_page in professor.rating_pages.all %}
+    {% for review in rating_page.reviews.all%}
     <a href="#" class="list-group-item list-group-item-action flex-column align-items-start bg-dark">
       <div class="d-flex w-100 justify-content-between">
 
@@ -79,7 +79,7 @@
     {% endfor %}
   </div>
 </div>
-<center>Last updated: {{professor.lastUpdated}}
+<center>Last updated: {{professor.last_updated}}
   {% for person in dopplegangers %}
   {{person.name}}
 {% endfor %}</center>
