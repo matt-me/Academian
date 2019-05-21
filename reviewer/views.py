@@ -1,3 +1,4 @@
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.http import Http404
 # Create your views here.
@@ -7,7 +8,7 @@ from .models import Professor, ReviewSnapshot, Review, Session
 from RMPScraper import getRMPReviews, ProfessorSearch
 from ULoopScraper import ULoopSearch, GetULoopReviews
 from django.utils import timezone
-
+from .forms import ReviewForm
 def index(request):
     # lists of the top 5 recent and popular professors
     popular_professors = sorted(Professor.objects.all(), key=lambda professor: professor.hit_counter, reverse=True)[:5]
@@ -30,82 +31,168 @@ def index(request):
 
 def professor(request, id):
     session_obj = None
+    professor_obj = None
     try:
-        professor = Professor.objects.get(id=id)
-        professor.hit_counter = professor.hit_counter + 1
-        if professor.needsUpdated():
-            text_reviews = getRMPReviews("http://www.ratemyprofessors.com" + professor.rmp_link)
-            snapshot = ReviewSnapshot(rmp_url=professor.rmp_link)
-            snapshot.save()
-            professor.rating_pages.add(snapshot)
-            for review in text_reviews:
+        uloop_reviews = [[]]
+        professor_obj = Professor.objects.get(id=id)
+        professor_obj.hit_counter = professor_obj.hit_counter + 1
+        if True: # professor_obj.needsUpdated():
+            rmp_reviews = getRMPReviews("http://www.ratemyprofessors.com" + professor_obj.rmp_link)
+            # if the professor has no uloop page
+            if (professor_obj.uloop_link != ""):
+                # this also returns the school from the page
+                uloop_reviews = GetULoopReviews(professor_obj.uloop_link)
+                if (uloop_reviews[2] != professor_obj.school):
+                    # if this is true, then it means that the wrong uloop link got assigned. it must be set to "" and tried again
+                    # this is expected to happen in some cases, so let's handle it
+                    uloop_reviews[0] = []
+                    try:
+                        actual_professor = Professor.objects.get(name=professor_obj.name, department=professor_obj.department, school=uloop_reviews[2])
+                        actual_professor.uloop_link = professor_obj.uloop_link
+                        actual_professor.save()
+                    except Professor.DoesNotExist:
+                        pass
+                    professor_obj.uloop_link = ""
+                if professor_obj.school == "":
+                    professor_obj.school = uloop_reviews[2]
+            rmp_snapshot = ReviewSnapshot(url=professor_obj.rmp_link)
+            rmp_snapshot.save()
+            uloop_snapshot = ReviewSnapshot(url=professor_obj.uloop_link)
+            uloop_snapshot.save()
+            professor_obj.rating_pages.add(rmp_snapshot)
+            professor_obj.rating_pages.add(uloop_snapshot)
+            # Get rmp_reviews
+            for review in rmp_reviews:
                 database_review = Review(date=review[1], source="ratemyprofessor", rating=review[2])
                 database_review.setText(review[0])
                 #check for a duplicate review (if two reviews have identical text fields)
                 should_save = True
-                for rating_page in professor.rating_pages.all():
+                for rating_page in professor_obj.rating_pages.all():
                     for other_review in rating_page.reviews.all():
                         if database_review.text_hash == other_review.text_hash:
                             # don't save, because this is a duplicate review
                             should_save = False
                 if should_save: # if this is not a duplicate review
                     database_review.save()
-                    snapshot.reviews.add(database_review)
-        professor.last_updated = timezone.now()
+                    rmp_snapshot.reviews.add(database_review)
+            #Get uLoop reviews
+            for review in uloop_reviews[0]:
+                if (len(review) == 0):
+                    break
+                database_review = database_review = Review(date=timezone.datetime(2011, 1, 1), source="uLoop")
+                database_review.setText(str(review))
+                should_save = True
+                for rating_page in professor_obj.rating_pages.all():
+                    for other_review in rating_page.reviews.all():
+                        if database_review.text_hash == other_review.text_hash:
+                            # don't save, because this is a duplicate review
+                            should_save = False
+                if should_save: # if this is not a duplicate review
+                    database_review.save()
+                    uloop_snapshot.reviews.add(database_review)
+                    # since this is uloop, it's possible the school wasn't cached during the search (if it didn't exist on RMP)
+        professor_obj.last_updated = timezone.now()
         #professor.removeDuplicateReviews()
-        professor.save()
+        professor_obj.save()
     except Professor.DoesNotExist:
         # the professor should exist, as the only way to view a professor page is to use the search function
         # which generates professor pages on search results
         raise Http404("Professor does not exist.")
+    # now upkeep the session history
     try:
         session_id = request.COOKIES["session_id"]
         # See if the user has a valid session
         session_obj = Session.objects.get(id=session_id)
-    except (TypeError, KeyError, ValueError) as e:
+    except (TypeError, KeyError, ValueError, Session.DoesNotExist) as e:
         # else create a new session
         session_obj = Session()
-        session_obj.save()
         session_id = session_obj.id
-        print(session_obj.id)
+        session_obj.save()
     session_obj.history.add(Professor.objects.get(id=id))
     session_obj.save()
-    response = render(request, 'reviewer/professor.html', {'prof_history': session_obj.history.all(), 'professor': professor, 'dopplegangers': professor.getDopplegangers(), "alternate_identities": professor.getAlternateIdentities()})
+    # the following code is for the submission form
+    if request.method == 'POST':
+        # create a new review
+        new_review = Review(source="admin", date=timezone.now())
+        new_review.setText(request.POST['text'])
+        new_review.save()
+        professor_obj.user_reviews.add(new_review)
+        professor_obj.save()
+        # create a form instance and populate it with data from the request:
+        form = ReviewForm(request.POST)
+        # check whether it's valid:
+        if form.is_valid():
+            # process the data in form.cleaned_data as required
+            # ...
+            # redirect to a new URL:
+            # return HttpResponseRedirect('/thanks/')
+            pass
+    else:
+        form = ReviewForm()
+        pass
+
+    # submit the response to view the professor page
+    response = render(request, 'reviewer/professor.html', {'prof_history': session_obj.history.all(), 'professor': professor_obj, 'dopplegangers': professor_obj.getDopplegangers(), "alternate_identities": professor_obj.getAlternateIdentities(), 'form': form})
     response.set_cookie("session_id", session_id)
     return response
 
 def results(request, name):
-    rmp_professors = ProfessorSearch(name)
+    rmp_professors = ProfessorSearch(name) # [name, school, page_link["href"], subject]
     uloop_professors = ULoopSearch(name)
     professor_list = []
-    for professor in rmp_professors:
+    new_professor = None
+    # First get the professors from RateMyProfessor
+    for professor_obj in rmp_professors:
         # first format the name
-        last_first = professor[0]
+        last_first = professor_obj[0]
         spliced = last_first.split(",")
         first_last = ""
         for i in range(len(spliced)):
             first_last = first_last.strip() + " " + spliced[len(spliced) - 1 - i]
         try:
-            prof_object = Professor.objects.get(name=first_last[0:len(first_last)], school=professor[1])
-            if (prof_object.department != professor[3]):
-                prof_object.department = professor[3] # set the department to what it is
-            professor_list.append(prof_object)
-            prof_object.save()
+            database_object = Professor.objects.get(name=first_last[0:len(first_last)], school=professor_obj[1], department=professor_obj[3])
+            if (database_object.department != professor_obj[3]):
+                # set the department to what it is
+                database_object.department = professor_obj[3]
+            professor_list.append(database_object)
+            database_object.save()
         except Professor.DoesNotExist:
-            new_professor = Professor(name=first_last, school=professor[1], department=professor[3], last_updated=timezone.datetime(2011, 1, 1), hit_counter=0, rmp_link=professor[2])
+            new_professor = Professor(name=first_last, school=professor_obj[1], department=professor_obj[3], last_updated=timezone.datetime(2011, 1, 1), hit_counter=0, rmp_link=professor_obj[2], uloop_link="")
             new_professor.save()
             professor_list.append(new_professor)
     formatted_list = sorted(professor_list, key=lambda professor: professor.hit_counter)
-    formatted_list.reverse() #sorted returns it in the opposite order
-    for professor in uloop_professors:
+    #sorted returns it in the opposite order
+    formatted_list.reverse()
+    # Now get the uLoop professors
+    for professor_obj in uloop_professors:
         try:
-            prof_object = Professor.objects.get(name=professor[0], department=professor[3])
-            if prof_object not in formatted_list:
-                formatted_list.append(prof_object) # exists in uloop but not ratemyprofessor, so add it to the search results
+            database_object = Professor.objects.get(name=professor_obj[0], department=professor_obj[3])
+            # one professor found in the database
+            if database_object not in formatted_list:
+                # if it wasn't in ratemyprofessor, then it should be added to the list
+                formatted_list.append(database_object)
+            if database_object.uloop_link == "":
+                # if it was, then it should be given a uloop link if it doesn't have one already - it might be new
+                database_object.uloop_link = professor_obj[2]
+                database_object.save()
         except Professor.DoesNotExist:
-            # add the professor to the list
-            new_professor = Professor(name=professor[0], school="", department=professor[3], last_updated=timezone.datetime(2011, 1, 1), hit_counter=0, rmp_link=professor[2])
+            # new professor is not in the database yet, and not in ratemyprofessor
+            new_professor = Professor(name=professor_obj[0], school="", department=professor_obj[3], last_updated=timezone.datetime(2011, 1, 1), hit_counter=0, uloop_link=professor_obj[2])
+            # will have to update the school field later
             new_professor.save()
             formatted_list.append(new_professor)
+        except Professor.MultipleObjectsReturned:
+            # professor teaches at more than one university
+            # this is problematic because uloop does not differentiate between schools on the search page
+            database_objects = Professor.objects.filter(name=professor_obj[0], department=professor_obj[3])
+            for guy in database_objects:
+                if (guy.uloop_link == ""):
+                    guy.uloop_link = professor_obj[2]
+                    guy.save()
+                    print("link:" + guy.uloop_link)
+                    # searched professor has the same name and the same department as the one in the database, but we aren't sure if it has the same school
+                    # so, just assign it to any uloop link. If this turns out to be wrong, it can always be changed before the professor page is displayed
+                if guy not in formatted_list:
+                    formatted_list.append(guy)
     return render(request, 'reviewer/results.html', {'professors': formatted_list})
     
