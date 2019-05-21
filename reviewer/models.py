@@ -19,7 +19,7 @@ class School(models.Model):
         return self.name
     
 class Review(models.Model):
-    text = models.CharField(max_length=500)
+    text = models.CharField(max_length=1000)
     date = models.DateField()
     source = models.CharField(max_length=20)
     text_hash = models.CharField(max_length=53)
@@ -47,20 +47,21 @@ class Review(models.Model):
         return other.text_hash and other.source and self.text_hash == other.text_hash and self.source == other.source
 
 class ReviewSnapshot(models.Model):
-    rmp_url = models.URLField()
+    url = models.URLField()
     professor_name = models.CharField(max_length=50)
     reviews = models.ManyToManyField(Review)
 
 class Professor(models.Model):
     name = models.CharField(max_length=50)
     courses = models.ManyToManyField(Course)
-    school = models.CharField(max_length=100)
+    school = models.CharField(max_length=150)
     department = models.CharField(max_length=100)
-    rmp_link = models.CharField(max_length=50)
-    uloop_link = models.CharField(max_length=50)
+    rmp_link = models.CharField(max_length=100)
+    uloop_link = models.CharField(max_length=100)
     rating_pages = models.ManyToManyField(ReviewSnapshot)
     last_updated = models.DateTimeField()
     hit_counter = models.IntegerField()
+    user_reviews = models.ManyToManyField(Review)
 
     def needsUpdated(self): # hasn't been updated in 24 hours
         return not self.last_updated >= timezone.now() - datetime.timedelta(days=1)
@@ -76,6 +77,19 @@ class Professor(models.Model):
             for review in rating_page.reviews.all():
                 i += 1
         return i
+
+    # returns a list of all of reviews
+    def getAllReviews(self):
+        review_list = []
+        for rating_page in self.rating_pages.all():
+            for review in rating_page.reviews.all():
+                review_list.append(review)
+        for review in self.user_reviews.all():
+            review_list.append(review)
+        review_list = sorted(review_list, key=lambda review: review.date)
+        review_list.reverse()
+        return review_list
+
     def removeDuplicateReviews(self):
         for rating_page in self.rating_pages.all():
             for review in rating_page.reviews.all():
@@ -116,6 +130,7 @@ class Professor(models.Model):
         return alternate_identities
     def __str__(self):
         return self.name
+    
 
 class ULoopReview(models.Model):
     overall = models.IntegerField()
