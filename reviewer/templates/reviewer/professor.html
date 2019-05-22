@@ -38,7 +38,6 @@
       <li class="nav-item">
         <a class="nav-link" href="/reviewer/about">About</a>
       </li>
-
     </ul>
   </div>
 </nav>
@@ -51,12 +50,30 @@
   {% for identity in  alternate_identities %}
     <h4> <a href="/reviewer/professor/{{ identity.id }}/">(see also: {{identity.name}} at {{identity.school}})</a></h4>
   {% endfor %}
+  <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">
+      Add Review
+    </button>
+    
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content bg-dark">
+          <form action="/reviewer/professor/{{ professor.id }}/" method="post">
+          <div class="modal-body">
+                <div class="input-group">
+                {% csrf_token %}
+                {{ form }}
+                  </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary" value="Submit">Post Review</button>
+          </div>
+        </form>
+        </div>
+      </div>
+    </div>
   <div class="container">
-      <form action="/reviewer/professor/{{ professor.id }}/" method="post">
-        {% csrf_token %}
-        {{ form }}
-        <input type="submit" value="Submit">
-    </form>
     <div class="list-group-item list-group-item-action flex-column align-items-start bg-dark">
       <div class="d-flex w-100 justify-content-between">
         <h5 class="mb-1 text-primary">All Reviews</h5>
@@ -65,8 +82,6 @@
       {% for review in professor.getAllReviews %}
       <a href="#" class="list-group-item list-group-item-action flex-column align-items-start bg-dark">
         <div class="d-flex w-100 justify-content-between">
-
-
         </div>
         <p class="mb-1 text-secondary">{{review.text}}</p>
         <small>
