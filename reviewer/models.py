@@ -5,19 +5,10 @@ from django.utils import timezone
 import hashlib
 # Create your models here.
 
-class Course(models.Model):
-    name = models.CharField(max_length=50)
-    description = models.CharField(max_length=100)
-    school = models.CharField(max_length=100)
-    def __str__(self):
-        return self.name
-        
 class School(models.Model):
-    name = models.CharField(max_length=50)
-    subreddit = models.CharField(max_length=50)
-    def __str__(self):
-        return self.name
-    
+    name = models.CharField(max_length=100)
+    subreddit = models.CharField(max_length=100)
+
 class Review(models.Model):
     text = models.CharField(max_length=1000)
     date = models.DateField()
@@ -53,8 +44,7 @@ class ReviewSnapshot(models.Model):
 
 class Professor(models.Model):
     name = models.CharField(max_length=50)
-    courses = models.ManyToManyField(Course)
-    school = models.CharField(max_length=150)
+    school = models.ForeignKey('School', on_delete=models.CASCADE)
     department = models.CharField(max_length=100)
     rmp_link = models.CharField(max_length=100)
     uloop_link = models.CharField(max_length=100)
@@ -64,7 +54,7 @@ class Professor(models.Model):
     user_reviews = models.ManyToManyField(Review)
 
     def needsUpdated(self): # hasn't been updated in 24 hours
-        return not self.last_updated >= timezone.now() - datetime.timedelta(days=1)
+        return self.last_updated < timezone.now() - datetime.timedelta(days=1) or self.school.name == ""
     
     def hasNew(self):
         for rating_page in self.rating_pages.all():
@@ -102,7 +92,7 @@ class Professor(models.Model):
         dopplegangers = []
         professor_name_list = self.name.split(" ")
         # get all of the professors teaching at this professor's school's department 
-        other_professors = Professor.objects.filter(school__contains=self.school, department__contains=self.department)
+        other_professors = Professor.objects.filter(school__name=self.school.name, department__contains=self.department)
         for professor in other_professors:
             other_name_list = professor.name.split(" ")
             if (len(professor_name_list) == len(other_name_list) and professor is not self):
@@ -125,9 +115,18 @@ class Professor(models.Model):
         return dopplegangers
         # returns professors that teach at a different school in the same subject with the same name
     def getAlternateIdentities(self):
-        alternate_identities = Professor.objects.filter(name__contains=self.name, department__contains=self.department).exclude(school__contains=self.school)
-
+        alternate_identities = Professor.objects.filter(name__contains=self.name, department__contains=self.department).exclude(school__name=self.school.name)
         return alternate_identities
+    
+    def setSchool(self, name):
+        other_school = None
+        try:
+            other_school = School.objects.get(name=name)
+        except School.DoesNotExist:
+            other_school = School(name=name)
+            other_school.save()
+        self.school = other_school
+    
     def __str__(self):
         return self.name
     
@@ -143,6 +142,12 @@ class ULoopReview(models.Model):
 class Session(models.Model):
     history = models.ManyToManyField(Professor)
 
-class redditSnapshot(models.Model):
+class RedditComment(models.Model):
+    text = models.CharField(max_length=10000)
+    children = models.ForeignKey('RedditComment', on_delete=models.CASCADE)
+
+class RedditSnapshot(models.Model):
     url = models.URLField()
-    reviews = models.ManyToManyField(Review)
+    text = models.CharField(max_length=10000)
+    children = models.ManyToManyField(RedditComment)
+
