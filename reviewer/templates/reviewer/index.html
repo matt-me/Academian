@@ -79,7 +79,7 @@
             {% for professor in recent_professors %}
             <a class="list-group-item bg-dark" href="/reviewer/professor/{{ professor.id }}/">
                 <h5 class="text-primary">{{ professor.name }}</h5>
-                <h6 class="text-secondary">{{ professor.school}}</h6>
+                <h6 class="text-secondary">{{ professor.school.name}}</h6>
                 {% if professor.hasNew %}
                 <span class="badge badge-warning">New</span>
                 {% endif %}
@@ -100,7 +100,7 @@
             {% for professor in popular_professors %}
             <a class="list-group-item bg-dark" href="/reviewer/professor/{{ professor.id }}/">
                 <h5 class="text-primary">{{ professor.name }} </h5>
-                <h6 class="text-secondary">{{ professor.school}}</h6>
+                <h6 class="text-secondary">{{ professor.school.name}}</h6>
                 
                 {% if professor.hasNew %}
                 <span class="badge badge-warning">New</span>

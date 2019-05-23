@@ -4,7 +4,7 @@ from django.http import Http404
 # Create your views here.
 from django.http import HttpResponse
 from django.template import loader
-from .models import Professor, ReviewSnapshot, Review, Session
+from .models import Professor, ReviewSnapshot, Review, Session, School
 from RMPScraper import getRMPReviews, ProfessorSearch
 from ULoopScraper import ULoopSearch, GetULoopReviews
 from django.utils import timezone
@@ -36,25 +36,25 @@ def professor(request, id):
         uloop_reviews = [[]]
         professor_obj = Professor.objects.get(id=id)
         professor_obj.hit_counter = professor_obj.hit_counter + 1
-        if True: # professor_obj.needsUpdated():
+        if professor_obj.needsUpdated():
             rmp_reviews = getRMPReviews("http://www.ratemyprofessors.com" + professor_obj.rmp_link)
-            # if the professor has no uloop page
+            # if the professor has a uloop page
             if (professor_obj.uloop_link != ""):
-                # this also returns the school from the page
+                # GetULoopReviews also returns the school from the page at uloop_reviews[2]
                 uloop_reviews = GetULoopReviews(professor_obj.uloop_link)
-                if (uloop_reviews[2] != professor_obj.school):
+                if (uloop_reviews[2] != professor_obj.school.name):
                     # if this is true, then it means that the wrong uloop link got assigned. it must be set to "" and tried again
                     # this is expected to happen in some cases, so let's handle it
                     uloop_reviews[0] = []
                     try:
-                        actual_professor = Professor.objects.get(name=professor_obj.name, department=professor_obj.department, school=uloop_reviews[2])
+                        actual_professor = Professor.objects.get(name=professor_obj.name, department=professor_obj.department, school__name=uloop_reviews[2])
                         actual_professor.uloop_link = professor_obj.uloop_link
                         actual_professor.save()
                     except Professor.DoesNotExist:
-                        pass
+                        pass # the professor for the right school doesn't exist yet, which is fine and simply means that nothing needs to be done
                     professor_obj.uloop_link = ""
-                if professor_obj.school == "":
-                    professor_obj.school = uloop_reviews[2]
+                if professor_obj.school.name == "":
+                    professor_obj.setSchool(uloop_reviews[2])
             rmp_snapshot = ReviewSnapshot(url=professor_obj.rmp_link)
             rmp_snapshot.save()
             uloop_snapshot = ReviewSnapshot(url=professor_obj.uloop_link)
@@ -150,14 +150,15 @@ def results(request, name):
         for i in range(len(spliced)):
             first_last = first_last.strip() + " " + spliced[len(spliced) - 1 - i]
         try:
-            database_object = Professor.objects.get(name=first_last[0:len(first_last)], school=professor_obj[1], department=professor_obj[3])
+            database_object = Professor.objects.get(name=first_last[0:len(first_last)], school__name=professor_obj[1], department=professor_obj[3])
             if (database_object.department != professor_obj[3]):
                 # set the department to what it is
                 database_object.department = professor_obj[3]
             professor_list.append(database_object)
             database_object.save()
         except Professor.DoesNotExist:
-            new_professor = Professor(name=first_last, school=professor_obj[1], department=professor_obj[3], last_updated=timezone.datetime(2011, 1, 1), hit_counter=0, rmp_link=professor_obj[2], uloop_link="")
+            new_professor = Professor(name=first_last, department=professor_obj[3], last_updated=timezone.datetime(2011, 1, 1), hit_counter=0, rmp_link=professor_obj[2], uloop_link="")
+            new_professor.setSchool(professor_obj[1])
             new_professor.save()
             professor_list.append(new_professor)
     formatted_list = sorted(professor_list, key=lambda professor: professor.hit_counter)
@@ -177,8 +178,9 @@ def results(request, name):
                 database_object.save()
         except Professor.DoesNotExist:
             # new professor is not in the database yet, and not in ratemyprofessor
-            new_professor = Professor(name=professor_obj[0], school="", department=professor_obj[3], last_updated=timezone.datetime(2011, 1, 1), hit_counter=0, uloop_link=professor_obj[2])
-            # will have to update the school field later
+            new_professor = Professor(name=professor_obj[0], department=professor_obj[3], last_updated=timezone.datetime(2011, 1, 1), hit_counter=0, uloop_link=professor_obj[2])
+            # will have to update the school field later, for now set it to a null default
+            new_professor.setSchool("")
             new_professor.save()
             formatted_list.append(new_professor)
         except Professor.MultipleObjectsReturned:
@@ -189,10 +191,12 @@ def results(request, name):
                 if (guy.uloop_link == ""):
                     guy.uloop_link = professor_obj[2]
                     guy.save()
-                    print("link:" + guy.uloop_link)
                     # searched professor has the same name and the same department as the one in the database, but we aren't sure if it has the same school
                     # so, just assign it to any uloop link. If this turns out to be wrong, it can always be changed before the professor page is displayed
                 if guy not in formatted_list:
                     formatted_list.append(guy)
     return render(request, 'reviewer/results.html', {'professors': formatted_list})
-    
+
+def about(request):
+    return render(request, 'reviewer/about.html')
+

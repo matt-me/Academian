@@ -45,7 +45,7 @@
           {% else %}
           <p class="mb-1 text-white">{{ professor.name }}</p>
           {% endif %}
-          <p class="mb-1 text-info">{{ professor.school }}</p>
+          <p class="mb-1 text-info">{{ professor.school.name }}</p>
           <small>
             {% if professor.hasNew %}
             <span class="badge badge-pill badge-warning">New</span>
