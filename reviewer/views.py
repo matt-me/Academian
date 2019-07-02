@@ -1,3 +1,4 @@
+import datetime
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.http import Http404
@@ -7,8 +8,10 @@ from django.template import loader
 from .models import Professor, ReviewSnapshot, Review, Session, School
 from RMPScraper import getRMPReviews, ProfessorSearch
 from ULoopScraper import ULoopSearch, GetULoopReviews
+from RedditScraper import *
 from django.utils import timezone
 from .forms import ReviewForm
+
 def index(request):
     # lists of the top 5 recent and popular professors
     popular_professors = sorted(Professor.objects.all(), key=lambda professor: professor.hit_counter, reverse=True)[:5]
@@ -36,8 +39,10 @@ def professor(request, id):
         uloop_reviews = [[]]
         professor_obj = Professor.objects.get(id=id)
         professor_obj.hit_counter = professor_obj.hit_counter + 1
-        if professor_obj.needsUpdated():
+        if True:#professor_obj.needsUpdated():
             rmp_reviews = getRMPReviews("http://www.ratemyprofessors.com" + professor_obj.rmp_link)
+            reddit_posts = GetThread(professor_obj.school.subreddit, professor_obj.name)
+            #reddit_posts = GetThread()
             # if the professor has a uloop page
             if (professor_obj.uloop_link != ""):
                 # GetULoopReviews also returns the school from the page at uloop_reviews[2]
@@ -59,8 +64,11 @@ def professor(request, id):
             rmp_snapshot.save()
             uloop_snapshot = ReviewSnapshot(url=professor_obj.uloop_link)
             uloop_snapshot.save()
+            reddit_snapshot = ReviewSnapshot(url="reddit.com") 
+            reddit_snapshot.save()
             professor_obj.rating_pages.add(rmp_snapshot)
             professor_obj.rating_pages.add(uloop_snapshot)
+            professor_obj.rating_pages.add(reddit_snapshot)
             # Get rmp_reviews
             for review in rmp_reviews:
                 database_review = Review(date=review[1], source="ratemyprofessor", rating=review[2])
@@ -79,7 +87,7 @@ def professor(request, id):
             for review in uloop_reviews[0]:
                 if (len(review) == 0):
                     break
-                database_review = database_review = Review(date=timezone.datetime(2011, 1, 1), source="uLoop")
+                database_review = Review(date=timezone.datetime(2011, 1, 1), source="uLoop")
                 database_review.setText(str(review))
                 should_save = True
                 for rating_page in professor_obj.rating_pages.all():
@@ -91,6 +99,19 @@ def professor(request, id):
                     database_review.save()
                     uloop_snapshot.reviews.add(database_review)
                     # since this is uloop, it's possible the school wasn't cached during the search (if it didn't exist on RMP)
+            for post in reddit_posts:
+                if (post[0] != ""):
+                    database_review = Review(date=datetime.datetime.fromtimestamp(post[1]), source="reddit")
+                    database_review.setText(post[0])
+                    should_save = True
+                    for rating_page in professor_obj.rating_pages.all():
+                        for other_review in rating_page.reviews.all():
+                            if database_review.text_hash == other_review.text_hash:
+                                # don't save, because this is a duplicate review
+                                should_save = False
+                    if should_save: # if this is not a duplicate review
+                        database_review.save()
+                        reddit_snapshot.reviews.add(database_review)
         professor_obj.last_updated = timezone.now()
         #professor.removeDuplicateReviews()
         professor_obj.save()
@@ -156,11 +177,17 @@ def results(request, name):
                 database_object.department = professor_obj[3]
             professor_list.append(database_object)
             database_object.save()
+            new_professor = database_object
         except Professor.DoesNotExist:
             new_professor = Professor(name=first_last, department=professor_obj[3], last_updated=timezone.datetime(2011, 1, 1), hit_counter=0, rmp_link=professor_obj[2], uloop_link="")
             new_professor.setSchool(professor_obj[1])
             new_professor.save()
             professor_list.append(new_professor)
+        if new_professor.school.name != "" and (new_professor.school.subreddit is None or new_professor.school.subreddit == ""):
+                # need to find the subreddit for the school
+                subreddit = SubredditSearch(new_professor.school.name)
+                new_professor.school.subreddit = subreddit
+                new_professor.school.save()
     formatted_list = sorted(professor_list, key=lambda professor: professor.hit_counter)
     #sorted returns it in the opposite order
     formatted_list.reverse()
@@ -180,9 +207,15 @@ def results(request, name):
             # new professor is not in the database yet, and not in ratemyprofessor
             new_professor = Professor(name=professor_obj[0], department=professor_obj[3], last_updated=timezone.datetime(2011, 1, 1), hit_counter=0, uloop_link=professor_obj[2])
             # will have to update the school field later, for now set it to a null default
+            # this is because uloop does not provide the school name when doing a search
             new_professor.setSchool("")
             new_professor.save()
             formatted_list.append(new_professor)
+            if new_professor.school.name != "" and (new_professor.school.subreddit is not None or new_professor.school.subreddit == ""):
+                # need to find the subreddit for the school
+                subreddit = SubredditSearch(new_professor.school.name)
+                new_professor.school.subreddit = subreddit
+                new_professor.school.save()
         except Professor.MultipleObjectsReturned:
             # professor teaches at more than one university
             # this is problematic because uloop does not differentiate between schools on the search page
@@ -195,7 +228,7 @@ def results(request, name):
                     # so, just assign it to any uloop link. If this turns out to be wrong, it can always be changed before the professor page is displayed
                 if guy not in formatted_list:
                     formatted_list.append(guy)
-    return render(request, 'reviewer/results.html', {'professors': formatted_list})
+    return render(request, 'reviewer/results.html', {'professors': formatted_list, "professor_count": len(formatted_list)})
 
 def about(request):
     return render(request, 'reviewer/about.html')

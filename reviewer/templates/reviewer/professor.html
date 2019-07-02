@@ -29,7 +29,7 @@
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
           {% for professor in prof_history %}
-            <a class="dropdown-item" href="/reviewer/professor/{{ professor.id }}/">{{professor.name}}</a>
+          <a class="dropdown-item" href="/reviewer/professor/{{ professor.id }}/">{{professor.name}}</a>
           {% endfor %}
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="#">Clear History</a>
@@ -48,56 +48,159 @@
   <h2>{{professor.school.name}}</h2>
   <h3>{{professor.department}}</h3>
   {% for identity in  alternate_identities %}
-    <h4> <a href="/reviewer/professor/{{ identity.id }}/">(see also: {{identity.name}} at {{identity.school.name}})</a></h4>
+  <h4> <a href="/reviewer/professor/{{ identity.id }}/">(see also: {{identity.name}} at {{identity.school.name}})</a>
+  </h4>
   {% endfor %}
-  <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">
-      Add Review
-    </button>
-    
-    <!-- Modal -->
-    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content bg-dark">
-          <form action="/reviewer/professor/{{ professor.id }}/" method="post">
+
+  <!-- Modal -->
+  <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content bg-dark">
+        <form action="/reviewer/professor/{{ professor.id }}/" method="post">
           <div class="modal-body">
-                <div class="input-group">
-                {% csrf_token %}
-                {{ form }}
-                  </div>
+            <div class="input-group">
+              {% csrf_token %}
+              {{ form }}
+            </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             <button type="submit" class="btn btn-primary" value="Submit">Post Review</button>
           </div>
         </form>
-        </div>
       </div>
     </div>
+  </div>
   <div class="container">
-    <div class="list-group-item list-group-item-action flex-column align-items-start bg-dark">
-      <div class="d-flex w-100 justify-content-between">
-        <h5 class="mb-1 text-primary">All Reviews</h5>
-      </div>
-    </div>
-      {% for review in professor.getAllReviews %}
-      <a href="#" class="list-group-item list-group-item-action flex-column align-items-start bg-dark">
-        <div class="d-flex w-100 justify-content-between">
-        </div>
-        <p class="mb-1 text-secondary">{{review.text}}</p>
-        <small>
-          {% if review.isNew %}
-          <span class="badge badge-pill badge-warning">New</span>
-          {% endif %}
-          <span class="badge badge-success">{{review.source}}</span>
-          <span class="badge badge-info">{{review.getDateString}}</span>
-          <span class="badge badge-success">{{review.rating}}</span>
-        </small>
-      </a>
+    <ul class="nav nav-tabs" id="AllTab" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home"
+          aria-selected="true"><img src="/static/reviewer/images/all.png" height="30" width="30"></img></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="RMPTab" data-toggle="tab" href="#RMP" role="tab" aria-controls="RMP"
+          aria-selected="false">
+          <img src="/static/reviewer/images/rmpsmile.png" height="30" width="30"></img></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="AcadTab" data-toggle="tab" href="#Academician" role="tab" aria-controls="Academician"
+          aria-selected="false">
+          <img src="/static/reviewer/images/favicon2.png" height="30" width="30">
+          </img>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="UloopTab" data-toggle="tab" href="#Uloop" role="tab" aria-controls="Uloop"
+          aria-selected="false">
+          <img src="/static/reviewer/images/uloop.png" height="30" width="30"></img>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="RedditTab" data-toggle="tab" href="#Reddit" role="tab" aria-controls="Reddit"
+          aria-selected="false">
+          <img src="/static/reviewer/images/reddit.png" height="29" width="29"></img>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="KoofersTab" data-toggle="tab" href="#Koofers" role="tab" aria-controls="Koofers"
+          aria-selected="false">
+          <img src="/static/reviewer/images/koofers.png" height="30" width="30" ></img>
+        </a>
+      </li>
+      <button type="button" class="btn btn-success" data-toggle="modal" data-target="#exampleModalCenter">
+        Add Review
+      </button>
+    </ul>
+    <div class="tab-content" id="myTabContent">
+      <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="AllTab">
+        {% for review in professor.getAllReviews %}
+        <a href="#" class="list-group-item list-group-item-action flex-column align-items-start bg-dark">
+          <div class="d-flex w-100 justify-content-between">
+          </div>
+          <p class="mb-1 text-secondary">{{review.text}}</p>
+          <small>
+            {% if review.isNew %}
+            <span class="badge badge-pill badge-warning">New</span>
+            {% endif %}
+            <span class="badge badge-success">{{review.source}}</span>
+            <span class="badge badge-info">{{review.getDateString}}</span>
+            <span class="badge badge-success">{{review.rating}}</span>
+          </small>
+        </a>
 
-      {% endfor %}
+        {% endfor %}
+      </div>
+      <div class="tab-pane fade" id="RMP" role="tabpanel" aria-labelledby="RMPTab">
+        {% for review in professor.getAllReviews %}
+          {% if review.source == "ratemyprofessor" %}
+            <a href="#" class="list-group-item list-group-item-action flex-column align-items-start bg-dark">
+              <div class="d-flex w-100 justify-content-between">
+              </div>
+              <p class="mb-1 text-secondary">{{review.text}}</p>
+              <small>
+                {% if review.isNew %}
+                <span class="badge badge-pill badge-warning">New</span>
+                {% endif %}
+                <span class="badge badge-info">{{review.getDateString}}</span>
+                <span class="badge badge-success">{{review.rating}}</span>
+              </small>
+            </a>
+          {% endif %}
+        {% endfor %}
+      </div>
+      <div class="tab-pane fade" id="Academician" role="tabpanel" aria-labelledby="AcadTab">
+          {% for review in professor.getAllReviews %}
+          {% if review.source == "admin" %}
+            <a href="#" class="list-group-item list-group-item-action flex-column align-items-start bg-dark">
+              <div class="d-flex w-100 justify-content-between">
+              </div>
+              <p class="mb-1 text-secondary">{{review.text}}</p>
+              <small>
+                {% if review.isNew %}
+                <span class="badge badge-pill badge-warning">New</span>
+                {% endif %}
+                <span class="badge badge-info">{{review.getDateString}}</span>
+              </small>
+            </a>
+          {% endif %}
+        {% endfor %}
+      </div>
+      <div class="tab-pane fade" id="Uloop" role="tabpanel" aria-labelledby="UloopTab">
+              {% for review in professor.getAllReviews %}
+              {% if review.source == "uLoop" %}
+                <a href="#" class="list-group-item list-group-item-action flex-column align-items-start bg-dark">
+                  <div class="d-flex w-100 justify-content-between">
+                  </div>
+                  <p class="mb-1 text-secondary">{{review.text}}</p>
+                </a>
+              {% endif %}
+            {% endfor %}
+      </div>
+      <div class="tab-pane fade" id="Reddit" role="tabpanel" aria-labelledby="RedditTab">
+        {% for review in professor.getAllReviews %}
+          {% if review.source == "reddit" %}
+            <a href="#" class="list-group-item list-group-item-action flex-column align-items-start bg-dark">
+              <div class="d-flex w-100 justify-content-between">
+              </div>
+              <p class="mb-1 text-secondary">{{review.text}}</p>
+              <small>
+                {% if review.isNew %}
+                <span class="badge badge-pill badge-warning">New</span>
+                {% endif %}
+                <span class="badge badge-info">{{review.getDateString}}</span>
+                <span class="badge badge-success">{{review.rating}}</span>
+                
+              </small>
+            </a>
+          {% endif %}
+        {% endfor %}
+      </div>
+      <div class="tab-pane fade" id="Koofers" role="tabpanel" aria-labelledby="KoofersTab">Coming soon!</div>
+    </div>
   </div>
 </div>
 <center>Last updated: {{professor.last_updated}}
   {% for person in dopplegangers %}
   {{person.name}}
-{% endfor %}</center>
+  {% endfor %}</center>

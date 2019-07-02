@@ -55,7 +55,7 @@
       <button type="submit" class="btn" id="searchbtn" value="Submit">Search</button>
       <script type="text/javascript">
         document.getElementById('searchform').onsubmit = function() {
-            window.location = 'search/' + document.getElementById('searchbar').value.replace(" ", "_");
+            window.location = 'search/' + document.getElementById('searchbar').value.replace(/ /g, "_");
             return false;
         }
       </script>
