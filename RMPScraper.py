@@ -3,7 +3,6 @@ import urllib.request
 import datetime
 def ProfessorSearch(prof_name):
     prof_name = prof_name.replace("_", "+")
-    #print(prof_name)
     site = "http://www.ratemyprofessors.com/search.jsp?query=" + prof_name
     document = urllib.request.urlopen(site).read()
     soup = BeautifulSoup(document, "html.parser")
