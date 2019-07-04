@@ -30,7 +30,7 @@
               </div>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="/reviewer/about">About</a>
+              <a class="nav-link" href="/academician/about">About</a>
             </li>
           </ul>
         </div>
@@ -38,7 +38,7 @@
 <div class="container">
   {% if professor_count > 0 %}
     {% for professor in professors %}
-        <a href="/reviewer/professor/{{ professor.id }}/" class="list-group-item list-group-item-action flex-column align-items-start bg-dark">
+        <a href="/academician/professor/{{ professor.id }}/" class="list-group-item list-group-item-action flex-column align-items-start bg-dark">
             <div class="d-flex w-100 justify-content-between">
             </div>
             {% if professor.hit_counter > 0 %}
@@ -66,7 +66,7 @@
             <button type="submit" class="btn" id="searchbtn" value="Submit">Search</button>
             <script type="text/javascript">
               document.getElementById('searchform').onsubmit = function() {
-                  window.location = '/reviewer/search/' + document.getElementById('searchbar').value.replace(/ /g, "_");
+                  window.location = '/academician/search/' + document.getElementById('searchbar').value.replace(/ /g, "_");
                   return false;
               }
             </script>

@@ -11,7 +11,7 @@
 <link rel="icon" href="/static/reviewer/images/favicon2.png">
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div style="padding-right: 10px"><img src="/static/reviewer/images/favicon2.png" width="35" height="35" alt=""></div>
-  <a class="navbar-brand" href="/reviewer/"> Academician </a>
+  <a class="navbar-brand" href="/academician/"> Academician </a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
     aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
@@ -29,14 +29,14 @@
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
           {% for professor in prof_history %}
-          <a class="dropdown-item" href="/reviewer/professor/{{ professor.id }}/">{{professor.name}}</a>
+          <a class="dropdown-item" href="/academician/professor/{{ professor.id }}/">{{professor.name}}</a>
           {% endfor %}
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="#">Clear History</a>
         </div>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="/reviewer/about">About</a>
+        <a class="nav-link" href="/academician/about">About</a>
       </li>
     </ul>
   </div>
@@ -48,7 +48,7 @@
   <h2>{{professor.school.name}}</h2>
   <h3>{{professor.department}}</h3>
   {% for identity in  alternate_identities %}
-  <h4> <a href="/reviewer/professor/{{ identity.id }}/">(see also: {{identity.name}} at {{identity.school.name}})</a>
+  <h4> <a href="/academician/professor/{{ identity.id }}/">(see also: {{identity.name}} at {{identity.school.name}})</a>
   </h4>
   {% endfor %}
 
@@ -57,7 +57,7 @@
     aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content bg-dark">
-        <form action="/reviewer/professor/{{ professor.id }}/" method="post">
+        <form action="/academician/professor/{{ professor.id }}/" method="post">
           <div class="modal-body">
             <div class="input-group">
               {% csrf_token %}
