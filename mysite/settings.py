@@ -21,7 +21,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: keep the secret key used in production secret!
 from mysite.secret_settings import SECRET_KEY
 from mysite.secret_settings import DEBUG
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['51.15.128.100']
 
 
 # Application definition
