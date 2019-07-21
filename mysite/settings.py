@@ -19,23 +19,15 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-from mysite.secret_settings import SECRET_KEY
-from mysite.secret_settings import DEBUG
-ALLOWED_HOSTS = ['51.15.128.100']
+from mysite.secret_settings import SECRET_KEY, DEBUG
+from mysite.secret_settings import DB_USERNAME
+from mysite.secret_settings import DB_PASSWORD
+from mysite.secret_settings import INSTALLED_APPS
+ALLOWED_HOSTS = ['51.15.128.100', 'matthewmessina.dev', '127.0.0.1']
 
 
 # Application definition
-
-INSTALLED_APPS = [
-    'reviewer.apps.ReviewerConfig',
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'mod_wsgi.server'
-]
+# Installed apps go here normally
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -75,8 +67,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'teacherdb',
-        'USER': 'mydatabaseuser',
-        'PASSWORD': 'mypasswordtre',
+        'USER': DB_USERNAME,
+        'PASSWORD': DB_PASSWORD,
         'HOST': '127.0.0.1',
         'PORT': '5432',
     }
