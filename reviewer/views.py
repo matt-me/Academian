@@ -30,7 +30,9 @@ def index(request):
         prof_history = None
     # no need to create a new session until the user actually goes to a professor page
     context = {'prof_history': prof_history, 'recent_professors': recent_professors, 'popular_professors': popular_professors, 'total_professors': total_professors, 'total_reviews': total_reviews}
-    return render(request, "reviewer/index.html", context)
+    response = render(request, "reviewer/index.html", context)
+    response.set_cookie("session_id", session_id)
+    return response
 
 def professor(request, id):
     session_obj = None
@@ -64,7 +66,7 @@ def professor(request, id):
             rmp_snapshot.save()
             uloop_snapshot = ReviewSnapshot(url=professor_obj.uloop_link)
             uloop_snapshot.save()
-            reddit_snapshot = ReviewSnapshot(url="reddit.com") 
+            reddit_snapshot = ReviewSnapshot(url="reddit.com")
             reddit_snapshot.save()
             professor_obj.rating_pages.add(rmp_snapshot)
             professor_obj.rating_pages.add(uloop_snapshot)
@@ -120,17 +122,20 @@ def professor(request, id):
         # which generates professor pages on search results
         raise Http404("Professor does not exist.")
     # now upkeep the session history
+    session_id = None
     try:
         session_id = request.COOKIES["session_id"]
         # See if the user has a valid session
+        print("got here")
         session_obj = Session.objects.get(id=session_id)
     except (TypeError, KeyError, ValueError, Session.DoesNotExist) as e:
+        print("new session")
         # else create a new session
         session_obj = Session()
-        session_id = session_obj.id
         session_obj.save()
     session_obj.history.add(Professor.objects.get(id=id))
     session_obj.save()
+    session_id = session_obj.id
     # the following code is for the submission form
     if request.method == 'POST':
         # create a new review
@@ -150,7 +155,6 @@ def professor(request, id):
             pass
     else:
         form = ReviewForm()
-        pass
 
     # submit the response to view the professor page
     response = render(request, 'reviewer/professor.html', {'prof_history': session_obj.history.all(), 'professor': professor_obj, 'dopplegangers': professor_obj.getDopplegangers(), "alternate_identities": professor_obj.getAlternateIdentities(), 'form': form})
@@ -184,10 +188,10 @@ def results(request, name):
             new_professor.save()
             professor_list.append(new_professor)
         if new_professor.school.name != "" and (new_professor.school.subreddit is None or new_professor.school.subreddit == ""):
-                # need to find the subreddit for the school
-                subreddit = SubredditSearch(new_professor.school.name)
-                new_professor.school.subreddit = subreddit
-                new_professor.school.save()
+            # need to find the subreddit for the school
+            subreddit = SubredditSearch(new_professor.school.name)
+            new_professor.school.subreddit = subreddit
+            new_professor.school.save()
     formatted_list = sorted(professor_list, key=lambda professor: professor.hit_counter)
     #sorted returns it in the opposite order
     formatted_list.reverse()
@@ -228,7 +232,22 @@ def results(request, name):
                     # so, just assign it to any uloop link. If this turns out to be wrong, it can always be changed before the professor page is displayed
                 if guy not in formatted_list:
                     formatted_list.append(guy)
-    return render(request, 'reviewer/results.html', {'professors': formatted_list, "professor_count": len(formatted_list)})
+
+    session_id = None
+    try:
+        session_id = request.COOKIES["session_id"]
+        # See if the user has a valid session
+        print("got here")
+        session_obj = Session.objects.get(id=session_id)
+    except (TypeError, KeyError, ValueError, Session.DoesNotExist) as e:
+        print("new session")
+        # else create a new session
+        session_obj = Session()
+        session_obj.save()
+    session_id = session_obj.id
+    response = render(request, 'reviewer/results.html', {'professors': formatted_list, "professor_count": len(formatted_list), 'prof_history': session_obj.history.all()})
+    response.set_cookie("session_id", session_id)
+    return response
 
 def about(request):
     return render(request, 'reviewer/about.html')
