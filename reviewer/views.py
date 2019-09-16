@@ -31,7 +31,8 @@ def index(request):
     # no need to create a new session until the user actually goes to a professor page
     context = {'prof_history': prof_history, 'recent_professors': recent_professors, 'popular_professors': popular_professors, 'total_professors': total_professors, 'total_reviews': total_reviews}
     response = render(request, "reviewer/index.html", context)
-    response.set_cookie("session_id", session_id)
+    if (prof_history is not None):
+        response.set_cookie("session_id", session_id)
     return response
 
 def professor(request, id):
