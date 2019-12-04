@@ -15,6 +15,7 @@ soupsieve = "*"
 urllib3 = "*"
 wrapt = "*"
 psycopg2 = "*"
+gunicorn = "*"
 
 
 
