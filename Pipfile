@@ -16,6 +16,7 @@ urllib3 = "*"
 wrapt = "*"
 psycopg2 = "*"
 gunicorn = "*"
+django-heroku = "*"
 
 
 
