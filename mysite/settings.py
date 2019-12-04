@@ -23,7 +23,7 @@ from mysite.secret_settings import SECRET_KEY, DEBUG
 from mysite.secret_settings import DB_USERNAME
 from mysite.secret_settings import DB_PASSWORD
 from mysite.secret_settings import INSTALLED_APPS
-ALLOWED_HOSTS = ['51.15.128.100', 'matthewmessina.dev', '127.0.0.1']
+ALLOWED_HOSTS = ['51.15.128.100', 'matthewmessina.dev', '127.0.0.1', 'localhost']
 
 
 # Application definition
