@@ -17,6 +17,7 @@ wrapt = "*"
 psycopg2 = "*"
 gunicorn = "*"
 django_heroku = "*"
+dj_database_url = "*"
 
 
 
