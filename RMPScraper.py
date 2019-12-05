@@ -3,7 +3,7 @@ import urllib.request
 import datetime
 def ProfessorSearch(prof_name):
     prof_name = prof_name.replace("_", "+")
-    site = "http://www.ratemyprofessors.com/search.jsp?query=" + prof_name
+    site = "https://www.ratemyprofessors.com/search.jsp?query=" + prof_name
     document = urllib.request.urlopen(site).read()
     soup = BeautifulSoup(document, "html.parser")
     results = soup.findAll(name="li", attrs={"listing PROFESSOR"})
@@ -36,6 +36,7 @@ def SchoolSearch(prof_name):
 
 #Given a link to a RMP webpage, extract the reviews from it
 def getRMPReviews(link):
+    print(link)
     result = []
     try:
         document = urllib.request.urlopen(link).read()
@@ -64,4 +65,4 @@ def getRMPReviews(link):
             pass
     return result
 
-#print(getRMPReviews("http://www.ratemyprofessors.com/ShowRatings.jsp?tid=735533"))
+#print(getRMPReviews("https://www.ratemyprofessors.com/ShowRatings.jsp?tid=735533"))

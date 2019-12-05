@@ -43,7 +43,7 @@ def professor(request, id):
         professor_obj = Professor.objects.get(id=id)
         professor_obj.hit_counter = professor_obj.hit_counter + 1
         if True:#professor_obj.needsUpdated():
-            rmp_reviews = getRMPReviews("http://www.ratemyprofessors.com" + professor_obj.rmp_link)
+            rmp_reviews = getRMPReviews("https://www.ratemyprofessors.com" + professor_obj.rmp_link)
             reddit_posts = GetThread(professor_obj.school.subreddit, professor_obj.name)
             #reddit_posts = GetThread()
             # if the professor has a uloop page
@@ -127,10 +127,8 @@ def professor(request, id):
     try:
         session_id = request.COOKIES["session_id"]
         # See if the user has a valid session
-        print("got here")
         session_obj = Session.objects.get(id=session_id)
     except (TypeError, KeyError, ValueError, Session.DoesNotExist) as e:
-        print("new session")
         # else create a new session
         session_obj = Session()
         session_obj.save()
