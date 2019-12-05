@@ -2,3 +2,4 @@ django
 django-heroku
 postgresql
 gunicorn
+whitenoise
