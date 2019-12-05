@@ -10,7 +10,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 import os
-import django_heroku
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -20,10 +19,25 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-from mysite.secret_settings import SECRET_KEY, DEBUG
-from mysite.secret_settings import DB_USERNAME
-from mysite.secret_settings import DB_PASSWORD
-from mysite.secret_settings import INSTALLED_APPS
+DATABASES = None
+if os.environ.get("DJANGOHEROKU") is None:
+    from mysite.secret_settings import SECRET_KEY, DEBUG
+    from mysite.secret_settings import DB_USERNAME
+    from mysite.secret_settings import DB_PASSWORD
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'teacherdb',
+            'USER': DB_USERNAME,
+            'PASSWORD': DB_PASSWORD,
+            'HOST': '127.0.0.1',
+            'PORT': '5432',
+        }
+    }
+else:
+    SECRET_KEY = os.environ.get("DJANGOHEROKU")
+    DEBUG = False
+    import django_heroku
 ALLOWED_HOSTS = ['51.15.128.100', 'matthewmessina.dev', '127.0.0.1', 'localhost']
 
 
@@ -38,6 +52,15 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+INSTALLED_APPS = [
+    'reviewer.apps.ReviewerConfig',
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
 ]
 
 ROOT_URLCONF = 'mysite.urls'
@@ -63,17 +86,6 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'teacherdb',
-        'USER': DB_USERNAME,
-        'PASSWORD': DB_PASSWORD,
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
-    }
-}
 
 
 # Password validation
@@ -114,4 +126,5 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = '/var/www'
-django_heroku.settings(locals())
+if os.environ.get("DJANGOHEROKU") is not None:
+    django_heroku.settings(locals())
