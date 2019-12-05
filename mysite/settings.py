@@ -39,7 +39,7 @@ else:
     DATABASES = {}
     DATABASES['default'] = dj_database_url.config(conn_max_age=600)
     SECRET_KEY = os.environ.get("DJANGOHEROKU")
-    DEBUG = False
+    DEBUG = True
     import django_heroku
 ALLOWED_HOSTS = ['51.15.128.100', 'matthewmessina.dev', '127.0.0.1', 'localhost', 'academian.herokuapp.com']
 
