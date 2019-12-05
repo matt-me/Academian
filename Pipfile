@@ -19,6 +19,7 @@ gunicorn = "*"
 django_heroku = "*"
 dj_database_url = "*"
 whitenoise = "*"
+beautifulsoup4 = "*"
 
 
 
