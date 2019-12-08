@@ -37,7 +37,7 @@
           </div>
         </li>
       <li class="nav-item">
-        <a class="nav-link" href="/academian/about">About</a>
+        <a class="nav-link" href="/about">About</a>
       </li>
 
     </ul>
@@ -77,7 +77,7 @@
 
           <ul class="list-group list-group-flush">
             {% for professor in recent_professors %}
-            <a class="list-group-item bg-dark" href="/academian/professor/{{ professor.id }}/">
+            <a class="list-group-item bg-dark" href="/professor/{{ professor.id }}/">
                 <h5 class="text-primary">{{ professor.name }}</h5>
                 <h6 class="text-secondary">{{ professor.school.name}}</h6>
                 {% if professor.hasNew %}
@@ -98,7 +98,7 @@
 
           <ul class="list-group list-group-flush">
             {% for professor in popular_professors %}
-            <a class="list-group-item bg-dark" href="/academian/professor/{{ professor.id }}/">
+            <a class="list-group-item bg-dark" href="/professor/{{ professor.id }}/">
                 <h5 class="text-primary">{{ professor.name }} </h5>
                 <h6 class="text-secondary">{{ professor.school.name}}</h6>
                 
