@@ -7,7 +7,7 @@ name = "pypi"
 
 
 [packages]
-Django = "==2.2.13"
+Django = "==2.2.24"
 requests = "*"
 setuptools = "*"
 six = "*"
